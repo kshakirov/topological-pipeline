@@ -38,12 +38,14 @@ type ComputeNode struct{
 	OutBox *Box
 	InBox  *Box
 	InChan chan Set
+	OutChan chan Set
 	
 }
 
 type SourceNode struct{
 	OutBox *Box
 	InChan *chan Set
+
 	
 }
 
@@ -56,7 +58,10 @@ func (s *SourceNode) AddOut(o *Box){
 
 func (s *SourceNode) Start(input Set){
 	fmt.Printf("%v\n", s)
-	*(s.InChan) <- s.OutBox.UserFunc(input)
+	res:= s.OutBox.UserFunc(input)
+	fmt.Printf("value tog o%v\n", res)
+	*(s.InChan) <- res
+	fmt.Printf("sent\n")
 
 }
 
@@ -69,6 +74,7 @@ func (s *ComputeNode) AddInOut(i *Box, o *Box){
 
 func (s *ComputeNode) Prep(){
 	s.InChan = make(chan Set, 10)
+	s.OutChan = make(chan Set, 10)
 }
 
 
@@ -77,7 +83,7 @@ func (s *ComputeNode) WireIn(){
 		for msg := range s.InChan {
 			fmt.Printf("here we go");
 			res := s.OutBox.UserFunc(msg)
-			s.InChan <- res
+			s.OutChan <- res
 		}
 	}()
 
@@ -155,20 +161,17 @@ func main() {
 
 	
 	box := NewBox("QuantumProcessor", heavyCompute)
-	c_box:=NewBox("test", testCompute)
+	c_box_1:=NewBox("testOut1", testCompute)
+	c_box_2:=NewBox("testOut2", testCompute)
 	sourceNode:=SourceNode{OutBox:box}
-	computeNode := ComputeNode{InBox: box, OutBox: c_box}
-	computeNode.WireIn()
+	computeNode := ComputeNode{InBox:c_box_1 , OutBox: c_box_2}
+	
 	computeNode.Prep()
+	computeNode.WireIn()
 	sourceNode.AddChannel(&computeNode.InChan)
+	
 	sourceNode.Start(1)
-	// for i := 1; i <= 6; i++ {
-	// 	fmt.Printf("📥 Подано на вход: %d\n", i)
-	// 	res:= box.Start(i)
-	// 	fmt.Printf("Получено со входа %s\n",res)
-	// }
-
-	// fmt.Println("🏁 Конвейер полностью остановлен.")
+	time.Sleep(time.Second * 10)
 }
 
 func heavyCompute(in Set) Set {
@@ -180,7 +183,8 @@ func heavyCompute(in Set) Set {
 	} else {
 		time.Sleep(10 * time.Millisecond) // Нечетные — шустрики
 	}
-	return fmt.Sprintf("Result(%d)", val*10)
+	return val*10
+
 }
 
 
