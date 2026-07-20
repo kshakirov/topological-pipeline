@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
-	_ "gostorm.org/go_storm/lib/spout"
+
+	"log"
+
 	_ "gostorm.org/go_storm/lib/bolt"
+	_ "gostorm.org/go_storm/lib/spout"
 	_ "gostorm.org/go_storm/lib/tuple"
 
 	_ "sync"
@@ -35,6 +37,7 @@ type MuxNode struct {
 
 
 type ComputeNode struct{
+	Id int
 	OutBox *Box
 	InBox  *Box
 	InChan chan Set
@@ -57,11 +60,11 @@ func (s *SourceNode) AddOut(o *Box){
 
 
 func (s *SourceNode) Start(input Set){
-	fmt.Printf("%v\n", s)
+	log.Printf("StartNode: Input = %v\n", s)
 	res:= s.OutBox.UserFunc(input)
-	fmt.Printf("value tog o%v\n", res)
+	log.Printf("StartNode: Output= %v \n", res)
 	*(s.InChan) <- res
-	fmt.Printf("sent\n")
+
 
 }
 
@@ -81,8 +84,11 @@ func (s *ComputeNode) Prep(){
 func (s *ComputeNode) WireIn(){
 	go func() {
 		for msg := range s.InChan {
-			fmt.Printf("here we go");
-			res := s.OutBox.UserFunc(msg)
+			log.Printf("ComputeNode[%d]: The msg arrived\n",s.Id );
+			res := s.InBox.UserFunc(msg)
+			log.Printf("InBox [%s] applied to the msg, result is [%v]\n", s.InBox.ID, res)
+			res = s.OutBox.UserFunc(res)
+			log.Printf("OutBox [%s] applied to the msg result is [%v]\n", s.OutBox.ID, res)
 			s.OutChan <- res
 		}
 	}()
@@ -170,26 +176,26 @@ func main() {
 	computeNode.WireIn()
 	sourceNode.AddChannel(&computeNode.InChan)
 	
-	sourceNode.Start(1)
-	time.Sleep(time.Second * 10)
+	sourceNode.Start(23)
+	time.Sleep(time.Second * 2)
 }
 
 func heavyCompute(in Set) Set {
 	val := in.(int)
-	fmt.Printf("%d in heavy \n", val);
+	log.Printf("Func heavyCompute input=%d\n", val);
 	// Искусственный разброс по времени, чтобы проверить FIFO на выходе
 	if val%2 == 0 {
 		time.Sleep(50 * time.Millisecond) // Четные — тугодумы
 	} else {
 		time.Sleep(10 * time.Millisecond) // Нечетные — шустрики
 	}
-	return val*10
+	return val
 
 }
 
 
 func testCompute(i Set) Set{
-	fmt.Printf("test %d\n", i)
+	log.Printf("Func TestCompute input= %d\n", i)
 	val := i.(int)
-	return val * 100
+	return val * 20
 }
