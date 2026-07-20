@@ -12,70 +12,8 @@ import (
 	"time"
 )
 
-// Data — универсальный объект нашей категории (пока просто interface{})
-
-// BoxFunc — чистая пользовательская функция. 
-// Принимает объект, возвращает трансформированный объект.
 
 
-
-
-
-
-type Vertex interface {
-	WireIn(ch<- chan Set)
-}
-
-type Graph struct {
-	Vertices []Vertex
-}
-
-
-func (g *Graph)Run(){
-	
-}
-
-type DemuxNode struct {
-	OutBoxes []Box
-	InBox *Box
-}
-
-
-func (d *DemuxNode) AddIn(box *Box){
-	d.InBox = box
-}
-
-func (d *DemuxNode) AddOut(box Box){
-	d.OutBoxes = append(d.OutBoxes, box)
-}
-
-
-func (d *MuxNode) AddIn(box *Box){
-	d.OutBox = box
-}
-
-func (d *MuxNode) addOut(box Box){
-	d.InBoxes = append(d.InBoxes, box)
-}
-
-
-
-func NewBox(id string, fn BoxFunc) *Box {
-	return &Box{
-		ID:          id,
-		UserFunc:    fn,
-
-	}
-}
-
-// Start запускает схемотехнику Ящика
-func (b *Box) Start(msg Set ) Set{
-	
-	res := b.UserFunc(msg)
-	return res
-	
-
-}
 
 
 
