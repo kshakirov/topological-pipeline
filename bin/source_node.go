@@ -1,13 +1,6 @@
 package main
 import("log")
 
-type SourceNode struct{
-	OutBox *Box
-	InChan *chan Set
-
-	
-}
-
 
 func (s *SourceNode) AddOut(o *Box){
 	s.OutBox = o
