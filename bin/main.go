@@ -2,7 +2,7 @@ package main
 
 import (
 
-	"log"
+_	"log"
 
 	_ "gostorm.org/go_storm/lib/bolt"
 	_ "gostorm.org/go_storm/lib/spout"
@@ -34,22 +34,3 @@ func main() {
 	time.Sleep(time.Second * 2)
 }
 
-func heavyCompute(in Set) Set {
-	val := in.(int)
-	log.Printf("Func heavyCompute input=%d\n", val);
-	// Искусственный разброс по времени, чтобы проверить FIFO на выходе
-	if val%2 == 0 {
-		time.Sleep(50 * time.Millisecond) // Четные — тугодумы
-	} else {
-		time.Sleep(10 * time.Millisecond) // Нечетные — шустрики
-	}
-	return val
-
-}
-
-
-func testCompute(i Set) Set{
-	log.Printf("Func TestCompute input= %d\n", i)
-	val := i.(int)
-	return val * 20
-}
