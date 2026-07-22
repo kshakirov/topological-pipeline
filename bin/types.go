@@ -1,5 +1,9 @@
 package main
 
+import (
+	"log"
+)
+
 type Set interface{
 
 }
@@ -37,14 +41,49 @@ type ComputeNode struct{
 }
 
 
-type Wire interface{
-	Put(msg Set)
-	Get() (Set,bool)
-	Close()	
+type Tuple struct{
+	Fst any
+	Snd any
 }
 
-type LocalWire struct {
+
+type InWire  any
+
+
+type OutWire any
+
+type Wire interface{
+	OutWire
+	InWire
+	Commute()	
+}
+
+
+type LocalInWire struct {
 	InChan chan Set
+	
+}
+
+type LocalOutWire struct{
 	OutChan chan Set
 }
 
+type LocalWire struct {
+	Id int
+	InChan chan Set
+	OutChan chan Set
+	
+}
+
+func (lw *LocalWire)WireIn(inBox Box, outBox Box){
+ 	go func() {
+		for msg := range lw.InChan {
+			log.Printf("Wire [%d]: The msg arrived\n",lw.Id );
+			res := inBox.UserFunc(msg)
+			log.Printf("InBox [%s] applied to the msg, result is [%v]\n", inBox.ID, res)
+			res = outBox.UserFunc(res)
+			log.Printf("OutBox [%s] applied to the msg result is [%v]\n", outBox.ID, res)
+			lw.OutChan <- res
+		}
+	}()
+}
