@@ -12,9 +12,8 @@ type Box struct {
 	ID          string
 	UserFunc    BoxFunc
 	
-	// может будет что то еще здесь, наверняка
-	//мультиплекоср или демультиплпксор будет содержать всю магию
 }
+
 type MuxNode struct {
 	InBoxes []Box
 	OutBox *Box
@@ -43,3 +42,9 @@ type Wire interface{
 	Get() (Set,bool)
 	Close()	
 }
+
+type LocalWire struct {
+	InChan chan Set
+	OutChan chan Set
+}
+

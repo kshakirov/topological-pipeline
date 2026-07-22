@@ -3,12 +3,7 @@ package main
 import (
 
 _	"log"
-
-	_ "gostorm.org/go_storm/lib/bolt"
-	_ "gostorm.org/go_storm/lib/spout"
-	_ "gostorm.org/go_storm/lib/tuple"
-
-	_ "sync"
+  	_ "sync"
 	"time"
 )
 
