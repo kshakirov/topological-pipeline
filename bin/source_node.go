@@ -14,23 +14,23 @@ func (s *SourceNode) Start(input Set){
 	log.Printf("StartNode: Input = %v\n", s)
 	res:= s.OutBox.UserFunc(input)
 	log.Printf("StartNode: Output= %v \n", res)
-	log.Printf("s.OutChan %v\n", *s.OutChan)
+	log.Printf("s.OutChan %v\n", *&s.Wire)
 	lres := Tuple{Fst:res,Snd:false}
-	(*s.OutChan).Write(lres, true)
+	(*&s.Wire).Write(lres)
 	//*(s.InChan) <- res
 
 
 }
 
 
-func (s *SourceNode) AddChannel(c *OutWire){
-	s.OutChan = c
+func (s *SourceNode) AddChannel(c Wire){
+	s.Wire = c
 
 }
 
 
 
-func wireStartNode(s *SourceNode,c *ComputeNode){
-	s.AddChannel(&c.OutChan)
+// func wireStartNode(s *SourceNode,c *ComputeNode){
+// 	s.AddChannel(&c.Wire)
 	
-}
+// }
