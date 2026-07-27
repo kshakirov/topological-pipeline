@@ -149,12 +149,12 @@ func (lw *LocalWire) Write(msg Set) {
 func (lw *LocalWire) WireIn(inBox Box, outBox Box) {
 	go func() {
 		log.Printf("inside localwire:\n")
-        for msg := range lw.InChan {
+        for msg := range lw.OutChan {
 		// Твоя рабочая двухтактная логика:
 		log.Printf("msg rec\n")
             res := inBox.UserFunc(msg)
             res = outBox.UserFunc(res)
-            lw.OutChan <- res
+		//lw.OutChan <- res
         }
     }()
 }

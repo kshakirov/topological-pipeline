@@ -16,7 +16,7 @@ func (s *SourceNode) Start(input Set){
 	log.Printf("StartNode: Output= %v \n", res)
 	log.Printf("s.OutChan %v\n", s.Wire)
 	lres := Tuple{Fst:res,Snd:false}
-	s.Wire.Write(lres)
+	s.Wire.Write(lres.Fst)
 	//*(s.InChan) <- res
 
 
