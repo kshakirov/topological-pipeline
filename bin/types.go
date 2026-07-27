@@ -1,7 +1,8 @@
 package main
 
 import (
-_	"log"
+	"log"
+	_ "log"
 )
 
 type Set interface{
@@ -141,13 +142,16 @@ func (lw *LocalWire) Read() Set {
 }
 
 func (lw *LocalWire) Write(msg Set) {
-    lw.OutChan <- msg
+	log.Printf("Write: %v\n",msg)
+	lw.OutChan <- msg
 }
 
 func (lw *LocalWire) WireIn(inBox Box, outBox Box) {
-    go func() {
+	go func() {
+		log.Printf("inside localwire:\n")
         for msg := range lw.InChan {
-            // Твоя рабочая двухтактная логика:
+		// Твоя рабочая двухтактная логика:
+		log.Printf("msg rec\n")
             res := inBox.UserFunc(msg)
             res = outBox.UserFunc(res)
             lw.OutChan <- res

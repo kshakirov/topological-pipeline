@@ -28,7 +28,7 @@ func main() {
 	computeNode.Prep()
 	//computeNode.Wire.WireIn(computeNode.InBox,computeNode.OutBox)
 	sourceNode.AddChannel(computeNode.Wire)
-	
+
 	sourceNode.Start(23)
 	time.Sleep(time.Second * 2)
 }
