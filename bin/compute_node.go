@@ -16,5 +16,5 @@ func (s *ComputeNode) AddInOut(i *Box, o *Box){
 func (s *ComputeNode) Prep() {
     // Ящик просто втыкает свои обработчики в провод. 
     // Вся асинхронная магия и горутины запускаются внутри провода.
-    s.Wire.WireIn(*s.InBox, *s.OutBox)
+    s.Wire.WireIn(*&s.InBox.UserFunc, *&s.OutBox.UserFunc)
 }

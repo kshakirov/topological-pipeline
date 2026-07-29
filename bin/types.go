@@ -67,7 +67,7 @@ type OutWire interface{
 type Wire interface {
     Read() Set               // Забрать квант данных (для такта IN)
     Write(msg Set)           // Протолкнуть квант данных (для такта OUT)
-    WireIn(inBox Box, outBox Box) // Запустить внутреннюю горутину связи
+    WireIn(inBoxFunc BoxFunc, outBoxFunc BoxFunc) // Запустить внутреннюю горутину связи
 }
 
 
@@ -90,14 +90,14 @@ func (lw *LocalWire) Write(msg Set) {
 	lw.OutChan <- msg
 }
 
-func (lw *LocalWire) WireIn(inBox Box, outBox Box) {
+func (lw *LocalWire) WireIn(inBoxFunc BoxFunc, outBoxFunc BoxFunc) {
 	go func() {
 		log.Printf("inside localwire:\n")
         for msg := range lw.OutChan {
 		// Твоя рабочая двухтактная логика:
 		log.Printf("msg rec\n")
-            res := inBox.UserFunc(msg)
-            res = outBox.UserFunc(res)
+            res := inBoxFunc(msg)
+            res = outBoxFunc(res)
 		//lw.OutChan <- res
         }
     }()
