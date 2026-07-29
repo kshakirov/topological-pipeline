@@ -27,10 +27,3 @@ func (s *SourceNode) AddChannel(c Wire){
 	s.Wire = c
 
 }
-
-
-
-// func wireStartNode(s *SourceNode,c *ComputeNode){
-// 	s.AddChannel(&c.Wire)
-	
-// }

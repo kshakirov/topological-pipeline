@@ -33,16 +33,6 @@ type SourceNode struct{
 }
 
 
-// type ComputeNode struct{
-// 	Id int
-// 	OutBox *Box
-// 	InBox  *Box
-// 	InChan InWire
-// 	OutChan OutWire
-// 	Wire Wire 
-// }
-
-
 type ComputeNode struct {
     Id     int
     InBox  *Box
@@ -72,9 +62,6 @@ type OutWire interface{
 	Init(any)
 }
 
-// type Wire interface{
-// 	WireIn(i *Box, o *Box)	
-// }
 
 
 type Wire interface {
@@ -85,49 +72,6 @@ type Wire interface {
 
 
 
-// type LocalInWire struct {
-	
-// 	InChan chan Set
-	
-// }
-// type LocalOutWire struct{
-// 	OutChan chan Set
-// }
-
-
-// func (lv *LocalInWire)Init(n int){
-// 	lv.InChan = make(chan Set, n)
-// }
-
-// func (lv *LocalOutWire)Init(n int){
-// 	lv.OutChan = make(chan Set, n)
-// }
-
-
-
-// func (lo * LocalOutWire)Write(tuple Tuple, some bool){
-// 	lo.OutChan <- tuple.Fst
-// }
-
-// type LocalWire struct {
-// 	Id int
-// 	InWire *LocalInWire
-// 	OutWire *LocalOutWire
-	
-// }
-
-// func (lw *LocalWire)WireIn(inBox *Box, outBox *Box){
-//  	go func() {
-// 		for msg := range lw.InWire.InChan {
-// 			log.Printf("Wire [%d]: The msg arrived\n",lw.Id );
-// 			res := inBox.UserFunc(msg)
-// 			log.Printf("InBox [%s] applied to the msg, result is [%v]\n", inBox.ID, res)
-// 			res = outBox.UserFunc(res)
-// 			log.Printf("OutBox [%s] applied to the msg result is [%v]\n", outBox.ID, res)
-// 			lw.OutWire.OutChan <- res
-// 		}
-// 	}()
-// }
 
 
 
