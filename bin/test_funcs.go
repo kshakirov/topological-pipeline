@@ -24,3 +24,10 @@ func testCompute(i Set) Set{
 	val := i.(int)
 	return val * 20
 }
+
+
+func testComputeB(i byte) byte{
+	log.Printf("Func TestCompute input= %d\n", i)
+
+	return i & 1
+}

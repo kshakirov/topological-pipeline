@@ -1,51 +1,104 @@
 package main
 
+import (
+	"log"
+	"time"
+)
+
 //оператор внешнего выбора -External Choice
-type SplitDispatcher interface{
-	WriteWithChoice(in Set) 
-}
 
 
-//оператор чередования Interleaving
-type SplitBuffer interface {
-	Interleave(out Set)
-}
+type BoxFuncB func(in byte) byte
 
-//параллельная композиция
-type SplitNode interface{
-	WriteWithChoice(in Set)
-	Interleave(out Set)
+// Box — инфраструктурный контейнер (Универсальный Узел)
+
+type BoxB struct {
+	ID          string
+	UserFuncB    BoxFuncB
 	
+}
+
+
+
+
+func NewBoxB(id string, fn BoxFuncB) *BoxB {
+	return &BoxB{
+		ID:          id,
+		UserFuncB:    fn,
+
+	}
 }
 
 
 type LocalSplitDispatcher struct{
-	currentIndex int;
-	channelsNumber int;
-	InChan chan Set
-	BoxesChans chan[] Set
+	currentIndex int
+	indices []int
+	channelsNumber int
+	InChan chan byte
+	BoxesChans []chan byte
 	//Wire который надо передать сорсу
 	
 }
 
-func (lsd *LocalSplitDispatcher) WriteWithChoice (in Set, boxesChans chan[] Set){
+func (lsd *LocalSplitDispatcher) WriteWithChoice (){
+	for i := range lsd.indices{
+		time.Sleep(time.Second * 5)
+		lsd.currentIndex = i
+		b := byte(i)
+		lsd.BoxesChans[i] <- b
+	}
 	//take current index пиши по модулю 
 }
 
 type LocalSplitBuffer struct{
-	buffer []Set
-	SinkChan Wire
+	buffer []byte
+	//InChan chan byte
 	
 }
 
-func (lsp *LocalSplitBuffer) Interleave(out Set){
+func (lsp *LocalSplitBuffer) Interleave(out byte){
 	// push all to the buffer the buffer is somehow connected to Wire
 }
 
+type Node struct {
+	Id     int
+	InBox  *BoxB
+	//OutBox *Box
+	InChan   chan byte // <--- ОДИН ЕДИНСТВЕННЫЙ РАЗЪЕМ!
+	OutChan chan byte
+	
+}
+//g
+
+
 type LocalSplitNode struct{
 	Dispatcher LocalSplitDispatcher
-	Nodes []ComputeNode
+	Nodes []Node
 	Buffer LocalSplitBuffer
 }
 
 //func (lsn *LocalSplitNode) Writer (Set) 
+
+
+func (lsb * LocalSplitBuffer) Dump(b byte){
+	lsb.buffer = append( lsb.buffer, b)
+}
+
+
+
+func (lsp *LocalSplitNode) Process() {
+	go func() {
+		//log.Printf("Inside LocalSplitNode\n")
+		//временно пока последовательно перебираем каналы
+		for _,b := range lsp.Nodes {
+			for msg := range b.OutChan {
+				// Твоя рабочая двухтактная логика:
+				//				log.Printf("msg rec\n")
+				res := b.InBox.UserFuncB(msg)
+				log.Printf("%v\n", res)
+				lsp.Buffer.Dump(res)
+				//lw.OutChan <- res
+			}
+		}
+	}()
+}
