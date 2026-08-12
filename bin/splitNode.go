@@ -30,7 +30,7 @@ func NewBoxB(id string, fn BoxFuncB) *BoxB {
 }
 
 
-type LocalSplitDispatcher struct{
+type LocalExternalChoice struct{
 	currentIndex int
 	indices []int
 	channelsNumber int
@@ -40,7 +40,7 @@ type LocalSplitDispatcher struct{
 	
 }
 
-func (lsd *LocalSplitDispatcher) WriteWithChoice (){
+func (lsd *LocalExternalChoice) WriteWithChoice (){
 	for i := range lsd.indices{
 		time.Sleep(time.Second * 1)
 		log.Printf("dispatcher is %d\n", i)
@@ -73,7 +73,7 @@ type Node struct {
 
 
 type LocalSplitNode struct{
-	Dispatcher LocalSplitDispatcher
+	ExternalChoice LocalExternalChoice
 	Nodes []Node
 	Buffer LocalSplitBuffer
 }
@@ -105,3 +105,16 @@ func (lsp *LocalSplitNode) Process() {
 		}
 	}()
 }
+
+
+type PrefixGenerator struct{
+	UserFunc BoxFuncB
+	OutChan chan byte 
+}
+
+
+func (pg *PrefixGenerator)Start(b byte){
+	res := pg.UserFunc(b)
+	pg.OutChan <- res
+}
+

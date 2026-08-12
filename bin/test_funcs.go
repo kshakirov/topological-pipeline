@@ -31,3 +31,8 @@ func testComputeB(i byte) byte{
 
 	return i & 1
 }
+
+func testPrefixGeneratorFunc(i byte) byte{
+	log.Printf("Func test prefix generator input= %d\n", i)
+	return i | 1
+}
