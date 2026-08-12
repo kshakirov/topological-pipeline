@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"time"
+_	"time"
 )
 
 //оператор внешнего выбора -External Choice
@@ -41,13 +41,17 @@ type LocalExternalChoice struct{
 }
 
 func (lsd *LocalExternalChoice) WriteWithChoice (){
-	for i := range lsd.indices{
-		time.Sleep(time.Second * 1)
-		log.Printf("dispatcher is %d\n", i)
-		lsd.currentIndex = i
-		b := byte(i)
-		lsd.BoxesChans[i] <- b
-	}
+	go func(){
+		for msg := range lsd.InChan {
+			log.Printf("LocalExternalChoime: Recieved from PrefixGenerator Payload: [%d] \n", msg)
+			for i := range lsd.indices{
+				lsd.BoxesChans[i] <- msg
+				lsd.currentIndex = (lsd.currentIndex + 1) % len(lsd.BoxesChans)
+			}
+
+			
+		}
+	}()
 	//take current index пиши по модулю 
 }
 
@@ -93,14 +97,14 @@ func (lsp *LocalSplitNode) Process() {
 		//временно пока последовательно перебираем каналы
 		for _,b := range lsp.Nodes {
 			go func(Node){
-			for msg := range b.InChan {
-				// Твоя рабочая двухтактная логика:
-				//				log.Printf("msg rec\n")
-				res := b.InBox.UserFuncB(msg)
-				log.Printf("b id is %d %v\n",b.Id, res)
-				lsp.Buffer.Dump(res)
-				//lw.OutChan <- res
-			}
+				for msg := range b.InChan {
+					// Твоя рабочая двухтактная логика:
+					//				log.Printf("msg rec\n")
+					res := b.InBox.UserFuncB(msg)
+					log.Printf("b id is %d %v\n",b.Id, res)
+					lsp.Buffer.Dump(res)
+					//lw.OutChan <- res
+				}
 			}(b)
 		}
 	}()

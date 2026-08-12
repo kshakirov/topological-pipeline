@@ -26,7 +26,7 @@ func main() {
 	lsp:= LocalSplitNode{ExternalChoice: dispatcher, Nodes: []Node{node_1, node_2}, Buffer: buffer}
 	lsp.Process()
 	dispatcher.WriteWithChoice()
-
+	pfg.Start(64)
 	log.Printf("%v, %v, %v %v", dispatcher, box_1, box_2, pfg)
 	
 
