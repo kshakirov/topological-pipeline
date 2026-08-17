@@ -1,10 +1,10 @@
 package main
 
 import (
-
 	"log"
-  	_ "sync"
-_	"time"
+	_ "sync"
+	"time"
+	_ "time"
 )
 
 
@@ -22,12 +22,13 @@ func main() {
 	buffer:= LocalSplitBuffer{buffer: make([]byte, 256)}
 
 	dispatcher := LocalExternalChoice{currentIndex: 0, indices: []int{1,2}, channelsNumber: 2, InChan: make(chan byte), BoxesChans: []chan byte{node_1.InChan, node_2.InChan}}
-	pfg := PrefixGenerator{UserFunc: testPrefixGeneratorFunc, OutChan: dispatcher.InChan}
+	pfg := PrefixGenerator{Func: testPrefixGeneratorLoop(128), OutChan: dispatcher.InChan}
 	lsp:= LocalSplitNode{ExternalChoice: dispatcher, Nodes: []Node{node_1, node_2}, Buffer: buffer}
 	lsp.Process()
 	dispatcher.WriteWithChoice()
 	pfg.Start(64)
 	log.Printf("%v, %v, %v %v", dispatcher, box_1, box_2, pfg)
+	time.Sleep(time.Second * 10 )
 	
 
 }

@@ -18,7 +18,7 @@ type BoxB struct {
 	
 }
 
-
+type PrefixGeneratorFunc func(OutChan chan byte)
 
 
 func NewBoxB(id string, fn BoxFuncB) *BoxB {
@@ -112,13 +112,13 @@ func (lsp *LocalSplitNode) Process() {
 
 
 type PrefixGenerator struct{
-	UserFunc BoxFuncB
+	Func  PrefixGeneratorFunc
 	OutChan chan byte 
 }
 
 
 func (pg *PrefixGenerator)Start(b byte){
-	res := pg.UserFunc(b)
-	pg.OutChan <- res
+	
+	go pg.Func(pg.OutChan)
 }
 

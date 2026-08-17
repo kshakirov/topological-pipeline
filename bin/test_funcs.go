@@ -36,3 +36,14 @@ func testPrefixGeneratorFunc(i byte) byte{
 	log.Printf("Func test prefix generator input= %d\n", i)
 	return i | 1
 }
+
+
+func testPrefixGeneratorLoop(limit uint64) func(chan byte){
+	return func(outChan chan byte){
+		for i := range(limit){
+			val:= byte(i)
+			outChan <- val
+		}
+		
+	}
+}
