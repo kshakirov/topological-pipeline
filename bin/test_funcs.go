@@ -40,6 +40,7 @@ func testPrefixGeneratorFunc(i byte) byte{
 
 func testPrefixGeneratorLoop(limit uint64) func(chan byte){
 	return func(outChan chan byte){
+		defer close(outChan)
 		for i := range(limit){
 			val:= byte(i)
 			outChan <- val

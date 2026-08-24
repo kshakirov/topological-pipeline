@@ -32,22 +32,22 @@ func NewBoxB(id string, fn BoxFuncB) *BoxB {
 
 type LocalExternalChoice struct{
 	currentIndex int
-	indices []int
-	channelsNumber int
 	InChan chan byte
 	BoxesChans []chan byte
-	//Wire который надо передать сорсу
-	
 }
 
 func (lsd *LocalExternalChoice) WriteWithChoice (){
 	go func(){
-		for msg := range lsd.InChan {
-			log.Printf("LocalExternalChoime: Recieved from PrefixGenerator Payload: [%d] \n", msg)
-			for i := range lsd.indices{
-				lsd.BoxesChans[i] <- msg
-				lsd.currentIndex = (lsd.currentIndex + 1) % len(lsd.BoxesChans)
+		defer func() {
+			for _, c := range lsd.BoxesChans {
+				close(c)
 			}
+		}()
+		for msg := range lsd.InChan {
+			log.Printf("LocalExternalChoimce: Recieved from PrefixGenerator Payload: [%d] \n", msg)
+			lsd.BoxesChans[lsd.currentIndex] <- msg
+			lsd.currentIndex = (lsd.currentIndex + 1) % len(lsd.BoxesChans)
+			
 
 			
 		}
@@ -101,7 +101,7 @@ func (lsp *LocalSplitNode) Process() {
 					// Твоя рабочая двухтактная логика:
 					//				log.Printf("msg rec\n")
 					res := b.InBox.UserFuncB(msg)
-					log.Printf("b id is %d %v\n",b.Id, res)
+					log.Printf("Box[%d] Processing Byte  %d\n",b.Id, res)
 					lsp.Buffer.Dump(res)
 					//lw.OutChan <- res
 				}
@@ -117,7 +117,7 @@ type PrefixGenerator struct{
 }
 
 
-func (pg *PrefixGenerator)Start(b byte){
+func (pg *PrefixGenerator)Start(){
 	
 	go pg.Func(pg.OutChan)
 }
