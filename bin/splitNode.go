@@ -57,12 +57,19 @@ func (lsd *LocalExternalChoice) WriteWithChoice (){
 
 type LocalSplitBuffer struct{
 	buffer []byte
+	InChan chan byte
 	//InChan chan byte
 	
 }
 
-func (lsp *LocalSplitBuffer) Interleave(out byte){
+func (lsb *LocalSplitBuffer) Interleave(){
 	// push all to the buffer the buffer is somehow connected to Wire
+	go func(){
+		for msg:= range lsb.InChan {
+			log.Printf("LocalSplitBuffer: received %v\n", msg)
+			lsb.buffer = append(lsb.buffer, msg)
+		}
+	}()
 }
 
 type Node struct {
@@ -82,12 +89,18 @@ type LocalSplitNode struct{
 	Buffer LocalSplitBuffer
 }
 
-//func (lsn *LocalSplitNode) Writer (Set) 
+func (lsp *LocalSplitNode) Init(){
+	for _,n:= range lsp.Nodes {
+		n.OutChan = lsp.Buffer.InChan
+	}
+}
 
 
 func (lsb * LocalSplitBuffer) Dump(b byte){
 	lsb.buffer = append( lsb.buffer, b)
 }
+
+
 
 
 
@@ -102,7 +115,7 @@ func (lsp *LocalSplitNode) Process() {
 					//				log.Printf("msg rec\n")
 					res := b.InBox.UserFuncB(msg)
 					log.Printf("Box[%d] Processing Byte  %d\n",b.Id, res)
-					lsp.Buffer.Dump(res)
+					lsp.Buffer.InChan <- res
 					//lw.OutChan <- res
 				}
 			}(b)
