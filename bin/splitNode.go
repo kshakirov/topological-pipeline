@@ -2,7 +2,8 @@ package main
 
 import (
 	"log"
-_	"time"
+	"sync"
+	_ "time"
 )
 
 //оператор внешнего выбора -External Choice
@@ -108,8 +109,11 @@ func (lsp *LocalSplitNode) Process() {
 	go func() {
 		//log.Printf("Inside LocalSplitNode\n")
 		//временно пока последовательно перебираем каналы
+		var wg sync.WaitGroup
 		for _,b := range lsp.Nodes {
+			wg.Add(1)
 			go func(Node){
+				defer wg.Done()
 				for msg := range b.InChan {
 					// Твоя рабочая двухтактная логика:
 					//				log.Printf("msg rec\n")
@@ -120,6 +124,8 @@ func (lsp *LocalSplitNode) Process() {
 				}
 			}(b)
 		}
+		wg.Wait()
+		close(lsp.Buffer.InChan)
 	}()
 }
 
