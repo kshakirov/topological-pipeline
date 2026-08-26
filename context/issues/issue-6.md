@@ -4,7 +4,7 @@
 **State:** OPEN
 **Author:** @kshakirov
 **Created:** 2026-08-26T14:34:01Z
-**Updated:** 2026-08-26T14:34:01Z
+**Updated:** 2026-08-26T15:14:30Z
 **URL:** https://github.com/kshakirov/topological-pipeline/issues/6
 
 ---
@@ -73,3 +73,14 @@ Channel после копирования остаётся общим, но slic
 ---
 
 ## Comments
+
+
+### @kshakirov — 2026-08-26T15:14:30Z
+
+Дропнули первый кусок termination protocol. Workers теперь живут под `WaitGroup`; координатор ждёт завершения всех отправителей и только после этого закрывает `Buffer.InChan`. Канал закрывает тот, кто точно знает, что новых sends уже не будет.
+
+Заодно убрали стартовые нули: slice теперь создаётся с `len=0`.
+
+Зверь живёт: `go test ./bin` и `go vet ./bin` проходят.
+
+Ordering не трогали. Следующая зацепка — завершение самого Smoother и единая точка наблюдения результата; копия slice header в `lsp.Buffer` пока остаётся открытым вопросом.
