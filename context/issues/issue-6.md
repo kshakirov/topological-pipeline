@@ -4,7 +4,7 @@
 **State:** OPEN
 **Author:** @kshakirov
 **Created:** 2026-08-26T14:34:01Z
-**Updated:** 2026-08-26T15:14:30Z
+**Updated:** 2026-08-31T14:28:08Z
 **URL:** https://github.com/kshakirov/topological-pipeline/issues/6
 
 ---
@@ -84,3 +84,21 @@ Channel после копирования остаётся общим, но slic
 Зверь живёт: `go test ./bin` и `go vet ./bin` проходят.
 
 Ordering не трогали. Следующая зацепка — завершение самого Smoother и единая точка наблюдения результата; копия slice header в `lsp.Buffer` пока остаётся открытым вопросом.
+
+
+### @kshakirov — 2026-08-31T14:28:08Z
+
+Дропнули следующий кусок живого тракта: `Smoother -> Sink`.
+
+`LocalSplitBuffer` больше не растит slice: принимает результат worker через `InChan` и сразу отдаёт его в `OutChan`. После полного drain входа Smoother закрывает собственный выход; Sink только читает и в закрытие чужого канала не лезет. Все каналы пока unbuffered — backpressure честно долетает от Sink до Source, capacity отдельно не угадывали.
+
+Зверь прошёл сквозную проверку: 128 входов -> 128 значений в Sink, 64 нуля / 64 единицы, `go test`, `go vet` и запуск под `-race` чистые.
+
+Что осталось:
+- перевести Source из конечной пачки в Eternal Streaming;
+- заменить `time.Sleep` явным lifecycle: вечная работа в нормальном режиме и отдельный проверяемый shutdown;
+- проверить длинные паузы: empty != closed;
+- позже отдельно решить capacity каждого участка, не ломая backpressure;
+- после стабилизации убрать мёртвые `OutChan`, `Dump` и прочие хвосты прототипа.
+
+Ordering, sequence ID и distributed Wire пока не трогаем.
