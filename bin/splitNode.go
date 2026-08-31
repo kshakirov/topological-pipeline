@@ -20,6 +20,7 @@ type BoxB struct {
 }
 
 type PrefixGeneratorFunc func(OutChan chan byte)
+type SinkFunc func(byte)
 
 
 func NewBoxB(id string, fn BoxFuncB) *BoxB {
@@ -57,8 +58,9 @@ func (lsd *LocalExternalChoice) WriteWithChoice (){
 }
 
 type LocalSplitBuffer struct{
-	buffer []byte
+
 	InChan chan byte
+	OutChan chan byte
 	//InChan chan byte
 	
 }
@@ -66,9 +68,11 @@ type LocalSplitBuffer struct{
 func (lsb *LocalSplitBuffer) Interleave(){
 	// push all to the buffer the buffer is somehow connected to Wire
 	go func(){
+		defer close(lsb.OutChan)
 		for msg:= range lsb.InChan {
 			log.Printf("LocalSplitBuffer: received %v\n", msg)
-			lsb.buffer = append(lsb.buffer, msg)
+			//lsb.buffer = append(lsb.buffer, msg)
+			lsb.OutChan <- msg
 		}
 	}()
 }
@@ -90,16 +94,16 @@ type LocalSplitNode struct{
 	Buffer LocalSplitBuffer
 }
 
-func (lsp *LocalSplitNode) Init(){
-	for _,n:= range lsp.Nodes {
-		n.OutChan = lsp.Buffer.InChan
-	}
-}
+// func (lsp *LocalSplitNode) Init(){
+// 	for _,n:= range lsp.Nodes {
+// 		n.OutChan = lsp.Buffer.InChan
+// 	}
+// }
 
 
-func (lsb * LocalSplitBuffer) Dump(b byte){
-	lsb.buffer = append( lsb.buffer, b)
-}
+// func (lsb * LocalSplitBuffer) Dump(b byte){
+// 	lsb.buffer = append( lsb.buffer, b)
+// }
 
 
 
@@ -134,7 +138,19 @@ type PrefixGenerator struct{
 	Func  PrefixGeneratorFunc
 	OutChan chan byte 
 }
+type Sink struct {
+	Func SinkFunc
+	InChan chan byte
+}
 
+func (s * Sink) Consume(){
+	go func(){
+		for msg:= range s.InChan{
+			s.Func(msg)
+			
+		}
+	}()
+}
 
 func (pg *PrefixGenerator)Start(){
 	
