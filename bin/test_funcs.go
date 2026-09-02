@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+
+	"math/rand/v2"
 	"time"
 )
 
@@ -35,11 +37,15 @@ func testPrefixGeneratorFunc(i byte) byte {
 	return i | 1
 }
 
-func testPrefixGeneratorLoop(limit uint64) func(chan byte) {
+func testPrefixGeneratorLoop() func(chan byte) {
 	return func(outChan chan byte) {
+
 		defer close(outChan)
-		for i := range limit {
-			val := byte(i)
+		for  {
+			interval:=   rand.NormFloat64() * 0.5 + 2
+			duration := time.Duration(interval * float64(time.Second))
+			val := byte(rand.IntN(256))
+			time.Sleep(duration)
 			outChan <- val
 		}
 

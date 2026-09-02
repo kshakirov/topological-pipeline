@@ -144,12 +144,12 @@ type Sink struct {
 }
 
 func (s * Sink) Consume(){
-	go func(){
+	//go func(){
 		for msg:= range s.InChan{
 			s.Func(msg)
 			
 		}
-	}()
+	//}()
 }
 
 func (pg *PrefixGenerator)Start(){
