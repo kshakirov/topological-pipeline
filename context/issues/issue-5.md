@@ -1,10 +1,10 @@
 # Issue #5 — Тикет #5: `LocalSplitBuffer` и Управление Сглаживанием Шторма (Interleaving)
 
 
-**State:** OPEN
+**State:** CLOSED
 **Author:** @kshakirov
 **Created:** 2026-08-19T13:46:04Z
-**Updated:** 2026-08-19T13:46:04Z
+**Updated:** 2026-09-02T13:19:27Z
 **URL:** https://github.com/kshakirov/topological-pipeline/issues/5
 
 ---
@@ -43,4 +43,3 @@
 ---
 
 ## Comments
-

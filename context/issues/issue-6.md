@@ -4,7 +4,7 @@
 **State:** OPEN
 **Author:** @kshakirov
 **Created:** 2026-08-26T14:34:01Z
-**Updated:** 2026-08-31T14:28:08Z
+**Updated:** 2026-09-02T14:20:49Z
 **URL:** https://github.com/kshakirov/topological-pipeline/issues/6
 
 ---
@@ -102,3 +102,14 @@ Ordering не трогали. Следующая зацепка — заверш
 - после стабилизации убрать мёртвые `OutChan`, `Dump` и прочие хвосты прототипа.
 
 Ordering, sequence ID и distributed Wire пока не трогаем.
+
+
+### @kshakirov — 2026-09-02T14:20:49Z
+
+Eternal Source поднят. Генератор теперь без лимита выдаёт равномерный случайный `byte` из `[0, 256)` и делает нормальные паузы с `μ = 2s`, `σ = 0.5s`. `main` больше не держится на `time.Sleep`: Sink работает синхронно в goroutine `main` и сам является terminal lifecycle point.
+
+Проверили повторно: `go test ./bin`, `go vet ./bin`; отдельный race-бинарник прожил 12 секунд, 6/6 квантов дошли до Sink, race и panic нет. Пауза между сообщениями pipeline не завершает — `empty != closed` живёт.
+
+Тикет пока не закрываем: остался один принципиальный хвост — управляемый shutdown Eternal Source. Нормальный режим уже вечный, но нужно отдельно доказать, что внешний приказ о завершении останавливает Source, после чего срабатывает существующий каскад drain/close до Sink без потери уже принятых сообщений. `context.Context` пока не тащим; сначала определим минимальный протокол.
+
+Capacity, ordering, sequence ID и distributed Wire остаются за периметром этого шага.
