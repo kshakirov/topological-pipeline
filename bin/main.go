@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-
+	Debug("Starting Go Storm\n")
 	box_1 := NewBoxB("b1", testComputeB)
 	box_2 := NewBoxB("b2", testComputeB)
 	node_1 := Node{Id: 1, InBox: box_1, InChan: make(chan byte), OutChan: make(chan byte)}
@@ -30,5 +30,6 @@ func main() {
 	dispatcher.WriteWithChoice()
 	pfg.Start()
 	sink.Consume()
+	Debug("Shutting down Go Storm on cancel ...\n")
 
 }

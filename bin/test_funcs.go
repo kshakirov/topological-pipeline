@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 
 	"math/rand/v2"
 	"time"
@@ -10,7 +9,7 @@ import (
 
 func heavyCompute(in Set) Set {
 	val := in.(int)
-	log.Printf("Func heavyCompute input=%d\n", val)
+	Debug("Func heavyCompute input = ","input", val)
 	// Искусственный разброс по времени, чтобы проверить FIFO на выходе
 	if val%2 == 0 {
 		time.Sleep(50 * time.Millisecond) // Четные — тугодумы
@@ -22,47 +21,45 @@ func heavyCompute(in Set) Set {
 }
 
 func testCompute(i Set) Set {
-	log.Printf("Func TestCompute input= %d\n", i)
+	Debug("Func TestCompute input= ", "input", i)
 	val := i.(int)
 	return val * 20
 }
 
 func testComputeB(i byte) byte {
-	log.Printf("Func TestCompute input= %d\n", i)
+	Debug("Func TestCompute input= ", "input", i)
 
 	return i & 1
 }
 
 func testPrefixGeneratorFunc(i byte) byte {
-	log.Printf("Func test prefix generator input= %d\n", i)
+	Debug("Func test prefix generator input= ", "input", i)
 	return i | 1
 }
 
 func testPrefixGeneratorLoop(ctx context.Context) func(chan byte) {
 	return func(outChan chan byte) {
- 
+
 		defer close(outChan)
-		for  {
-			interval:=   rand.NormFloat64() * 0.5 + 2
+		for {
+			interval := rand.NormFloat64()*0.5 + 2
 			duration := time.Duration(interval * float64(time.Second))
 			val := byte(rand.IntN(256))
+			Debug("Sleeping for ","duration", duration)
 			time.Sleep(duration)
 
 			select {
-			case <- ctx.Done():
-				
+			case <-ctx.Done():
+
 				return
 			case outChan <- val:
 			}
-				
-				
 
-				
 		}
 
 	}
 }
 
 func testSinkFunc(b byte) {
-	log.Printf("Sink: received %d\n", b)
+	Debug("Sink: received ", "input", b)
 }

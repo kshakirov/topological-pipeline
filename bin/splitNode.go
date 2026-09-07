@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"sync"
 	_ "time"
 )
@@ -41,7 +40,7 @@ func (lsd *LocalExternalChoice) WriteWithChoice() {
 			}
 		}()
 		for msg := range lsd.InChan {
-			log.Printf("LocalExternalChoimce: Recieved from PrefixGenerator Payload: [%d] \n", msg)
+			Debug("LocalExternalChoimce: Recieved from PrefixGenerator Payload: ", "msg", msg)
 			lsd.BoxesChans[lsd.currentIndex] <- msg
 			lsd.currentIndex = (lsd.currentIndex + 1) % len(lsd.BoxesChans)
 
@@ -62,7 +61,7 @@ func (lsb *LocalSplitBuffer) Interleave() {
 	go func() {
 		defer close(lsb.OutChan)
 		for msg := range lsb.InChan {
-			log.Printf("LocalSplitBuffer: received %v\n", msg)
+			Debug("LocalSplitBuffer: received ", "msg", msg)
 			//lsb.buffer = append(lsb.buffer, msg)
 			lsb.OutChan <- msg
 		}
@@ -97,7 +96,7 @@ type LocalSplitNode struct {
 
 func (lsp *LocalSplitNode) Process() {
 	go func() {
-		//log.Printf("Inside LocalSplitNode\n")
+		//Debug("Inside LocalSplitNode\n")
 		//временно пока последовательно перебираем каналы
 		var wg sync.WaitGroup
 		for _, b := range lsp.Nodes {
@@ -106,9 +105,9 @@ func (lsp *LocalSplitNode) Process() {
 				defer wg.Done()
 				for msg := range b.InChan {
 					// Твоя рабочая двухтактная логика:
-					//				log.Printf("msg rec\n")
+					//				Debug("msg rec\n")
 					res := b.InBox.UserFuncB(msg)
-					log.Printf("Box[%d] Processing Byte  %d\n", b.Id, res)
+					Debug("Box"," Processing Byte ", "id", b.Id, "result", res)
 					lsp.Buffer.InChan <- res
 					//lw.OutChan <- res
 				}
