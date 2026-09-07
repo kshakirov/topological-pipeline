@@ -45,14 +45,16 @@ func testPrefixGeneratorLoop(ctx context.Context) func(chan byte) {
 			interval := rand.NormFloat64()*0.5 + 2
 			duration := time.Duration(interval * float64(time.Second))
 			val := byte(rand.IntN(256))
-			Debug("Sleeping for ","duration", duration)
-			time.Sleep(duration)
 
 			select {
 			case <-ctx.Done():
 
 				return
+			case <-time.After(duration):
 			case outChan <- val:
+				Debug("Slept for ","duration", duration)
+				//				time.Sleep(duration)
+
 			}
 
 		}
