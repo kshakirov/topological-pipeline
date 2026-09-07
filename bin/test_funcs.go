@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"log"
 
 	"math/rand/v2"
@@ -37,16 +38,26 @@ func testPrefixGeneratorFunc(i byte) byte {
 	return i | 1
 }
 
-func testPrefixGeneratorLoop() func(chan byte) {
+func testPrefixGeneratorLoop(ctx context.Context) func(chan byte) {
 	return func(outChan chan byte) {
-
+ 
 		defer close(outChan)
 		for  {
 			interval:=   rand.NormFloat64() * 0.5 + 2
 			duration := time.Duration(interval * float64(time.Second))
 			val := byte(rand.IntN(256))
 			time.Sleep(duration)
-			outChan <- val
+
+			select {
+			case <- ctx.Done():
+				
+				return
+			case outChan <- val:
+			}
+				
+				
+
+				
 		}
 
 	}

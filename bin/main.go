@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"os"
+	"os/signal"
 	_ "sync"
 	_ "time"
 )
@@ -14,7 +17,10 @@ func main() {
 	buffer := LocalSplitBuffer{InChan: make(chan byte), OutChan: make(chan byte)}
 
 	dispatcher := LocalExternalChoice{currentIndex: 0, InChan: make(chan byte), BoxesChans: []chan byte{node_1.InChan, node_2.InChan}}
-	pfg := PrefixGenerator{Func: testPrefixGeneratorLoop(), OutChan: dispatcher.InChan}
+
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
+	pfg := PrefixGenerator{Func: testPrefixGeneratorLoop(ctx), OutChan: dispatcher.InChan}
 	lsp := LocalSplitNode{ExternalChoice: dispatcher, Nodes: []Node{node_1, node_2}, Buffer: buffer}
 	sink := Sink{InChan: buffer.OutChan, Func: testSinkFunc}
 
