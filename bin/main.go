@@ -1,35 +1,36 @@
 package main
 
 import (
-
-	"log"
-  	_ "sync"
-	"time"
+	"context"
+	"os"
+	"os/signal"
 )
 
-
-
-
-
-
 func main() {
+	Debug("Starting Go Storm")
 
-	
-	box := NewBox("QuantumProcessor", heavyCompute)
-	inBox:=NewBox("testOut1", testCompute)
-	outBox:=NewBox("testOut2", testCompute)
-	sourceNode:=SourceNode{OutBox:box}
-	//	computeNode := ComputeNode{InBox:c_box_1 , OutBox: c_box_2}
-	myWire := &LocalWire{Id: 1, InChan: make(chan Set,10), OutChan: make(chan Set, 10)}
-	
-	computeNode := ComputeNode{ Id: 0, InBox: inBox, OutBox: outBox, Wire: myWire }
+	box1 := NewBoxB("b1", testComputeB)
+	box2 := NewBoxB("b2", testComputeB)
+	node1 := Node{ID: 1, InBox: box1, InChan: make(chan byte)}
+	node2 := Node{ID: 2, InBox: box2, InChan: make(chan byte)}
+	smoother := LocalSplitBuffer{InChan: make(chan byte), OutChan: make(chan byte)}
+	dispatcher := LocalExternalChoice{
+		InChan:     make(chan byte),
+		BoxesChans: []chan byte{node1.InChan, node2.InChan},
+	}
 
-	log.Printf("%v\n", computeNode)
-	computeNode.Prep()
-	//computeNode.Wire.WireIn(computeNode.InBox,computeNode.OutBox)
-	sourceNode.AddChannel(computeNode.Wire)
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
 
-	sourceNode.Start(23)
-	time.Sleep(time.Second * 2)
+	generator := PrefixGenerator{Func: testPrefixGeneratorLoop(ctx), OutChan: dispatcher.InChan}
+	parallelNode := LocalSplitNode{Nodes: []Node{node1, node2}, Buffer: smoother}
+	sink := Sink{InChan: smoother.OutChan, Func: testSinkFunc}
+
+	smoother.Interleave()
+	parallelNode.Process()
+	dispatcher.WriteWithChoice()
+	generator.Start()
+	sink.Consume()
+
+	Debug("Go Storm stopped gracefully")
 }
-
