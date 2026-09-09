@@ -51,7 +51,7 @@ func testPrefixGeneratorLoop(ctx context.Context) func(chan byte) {
 
 				return
 			case <-time.After(duration):
-			case outChan <- val:
+				outChan <- val
 				Debug("Slept for ","duration", duration)
 				//				time.Sleep(duration)
 
