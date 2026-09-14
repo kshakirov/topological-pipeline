@@ -2,8 +2,12 @@ package main
 
 func main() {
 	Debug("Starting Go Storm")
-	generator := PrefixGeneratorTCP{Func: testPrefixGeneratorLoopTCP("localhost", 9090)}
+	generator := PrefixGeneratorTCP{Func: testPrefixGeneratorLoopTCP("127.0.0.1", 9090)}
+	consumer := SinkTCP{Func: testSinkGeneratorLoopTCP("127.0.0.1",9090)}
+
 	generator.Start()
+	consumer.Consume()
+
 	// box1 := NewBoxB("b1", testComputeB)
 	// box2 := NewBoxB("b2", testComputeB)
 	// node1 := Node{ID: 1, InBox: box1, InChan: make(chan byte)}

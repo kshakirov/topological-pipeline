@@ -1,7 +1,7 @@
 package main
 
 type PrefixGeneratorFuncTCP func()
-type SinkFuncTCP func(byte)
+type SinkFuncTCP func()
 
 
 
@@ -12,11 +12,17 @@ type PrefixGeneratorTCP struct {
 }
 
 func (generator *PrefixGeneratorTCP) Start() {
-	generator.Func()
+	go generator.Func()
 }
 
 
 type SinkTCP struct {
 	Func   SinkFuncTCP
 	InChan chan byte
+}
+
+
+func (sink * SinkTCP) Consume(){
+
+	sink.Func();
 }
