@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"time"
 )
 
 type PrefixGeneratorFuncTCP func()
@@ -48,7 +49,7 @@ func (choice *TcpExternalChoice) WriteWithChoice() {
 			n, err := conn.Read(buf)
 			if n > 0 {
 				Debug("TcpExternalChoice received payload ", "n", n)
-				choice.BoxesChans[choice.currentIndex] <- buf[0] //for POC just 
+				choice.BoxesChans[choice.currentIndex] <- buf[0] //for POC just
 				choice.currentIndex = (choice.currentIndex + 1) % len(choice.BoxesChans)
 
 			} else if err != nil {
@@ -97,3 +98,36 @@ func (choice *TcpExternalChoice) WriteWithChoice() {
 	// 	}
 	// }()
 }
+
+type TcpSpliterBuffferConfig struct {
+	hostName string
+	port     int
+}
+
+type TcpSplitBuffer struct {
+	InChan chan byte
+	Config TcpSpliterBuffferConfig
+	//	OutChan chan byte
+}
+
+func (smoother *TcpSplitBuffer) Interleave() {
+
+	go func() {
+
+		time.Sleep(time.Second * 5)
+		conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", smoother.Config.hostName, smoother.Config.port))
+
+		if err != nil {
+
+			log.Fatalf("Can't open the connection to %s  port %d\n", smoother.Config.hostName, smoother.Config.port)
+		}
+		for msg := range smoother.InChan {
+			Debug("LocalSplitBuffer received payload", "msg", msg)
+			fmt.Fprint(conn, msg)
+			Debug("PrefixGenerator emitted payload", "msg", msg)
+
+		}
+	}()
+}
+
+
