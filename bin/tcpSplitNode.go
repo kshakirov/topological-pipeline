@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"sync"
 	"time"
 )
 
@@ -130,4 +131,27 @@ func (smoother *TcpSplitBuffer) Interleave() {
 	}()
 }
 
+type TcpSplitNode struct {
+	Nodes  []Node
+	Buffer TcpSplitBuffer
+}
 
+func (node *TcpSplitNode) Process() {
+	go func() {
+		var workers sync.WaitGroup
+		for _, worker := range node.Nodes {
+			workers.Add(1)
+			go func(worker Node) {
+				defer workers.Done()
+				for msg := range worker.InChan {
+					result := worker.InBox.UserFuncB(msg)
+					Debug("Box processed payload", "id", worker.ID, "result", result)
+					node.Buffer.InChan <- result
+				}
+			}(worker)
+		}
+
+		workers.Wait()
+		close(node.Buffer.InChan)
+	}()
+}
