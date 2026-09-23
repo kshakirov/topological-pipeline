@@ -106,13 +106,13 @@ func (smoother *TcpSplitBuffer) Interleave() {
 
 		if err != nil {
 
-			Debug("LocalSplitBuffer: Can't open the connection to ", "host", smoother.Config.hostName, "port", smoother.Config.port)
+			Debug("TcpSplitBuffer: Can't open the connection to ", "host", smoother.Config.hostName, "port", smoother.Config.port)
 		}
 		for msg := range smoother.InChan {
-			Debug("LocalSplitBuffer: received payload", "msg", msg)
+			Debug("TcpSplitBuffer: received payload", "msg", msg)
 			//			fmt.Fprint(conn, msg)
 			conn.Write([]byte{msg})
-			Debug("LocalSplitBuffer: emitted payload", "msg", msg)
+			Debug("TcpSplitBuffer: emitted payload", "msg", msg)
 
 		}
 	}()
