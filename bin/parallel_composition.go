@@ -17,7 +17,7 @@ func ParallelComposition(config TcpSplitNodeConfig, f BoxFuncB){
 	smoother.Interleave()
 	parallelNode.Process()
 	dispatcher.WriteWithChoice()
-	
+	//can be later returned to start somewhere else
 }
 
 func (pc * TcpSplitNode) Start(){
