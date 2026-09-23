@@ -119,6 +119,7 @@ func (smoother *TcpSplitBuffer) Interleave() {
 }
 
 type TcpSplitNode struct {
+	Choice TcpExternalChoice
 	Nodes  []Node
 	Buffer TcpSplitBuffer
 }

@@ -18,22 +18,11 @@ func main() {
 		BoxesChans: []chan byte{node1.InChan, node2.InChan},
 		Config: TcpExternalChoiceConfig{"127.0.0.1",9090},
 	}
-	//dispatcher.WriteWithChoice()
-
-	// ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-	// defer cancel()
-
-	// generator := PrefixGenerator{Func: testPrefixGeneratorLoop(ctx), OutChan: dispatcher.InChan}
-
-	parallelNode := TcpSplitNode{Nodes: []Node{node1, node2}, Buffer: smoother}
-	// sink := Sink{InChan: smoother.OutChan, Func: testSinkFunc}
-
+	parallelNode := TcpSplitNode{Nodes: []Node{node1, node2}, Buffer: smoother, Choice: dispatcher}
 	smoother.Interleave()
 	parallelNode.Process()
 	dispatcher.WriteWithChoice()
 	generator.Start()
-	// generator.Start()
-	// sink.Consume()
 	consumer.Consume()
 	Debug("Go Storm stopped gracefully")
 }
