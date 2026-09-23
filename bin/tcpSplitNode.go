@@ -28,6 +28,13 @@ func (sink *SinkTCP) Consume() {
 	sink.Func()
 }
 
+type TcpSplitNodeConfig struct{
+	ChoiceConfig TcpExternalChoiceConfig
+	BufferConfig TcpSpliterBuffferConfig
+	Parallelism int
+	
+}
+
 type TcpExternalChoiceConfig struct {
 	hostName string
 	port     int
