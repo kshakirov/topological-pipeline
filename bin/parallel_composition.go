@@ -6,7 +6,7 @@ func ParallelComposition(config TcpSplitNodeConfig){
 	box2 := NewBoxB("b2", testComputeB)
 	node1 := Node{ID: 1, InBox: box1, InChan: make(chan byte)}
 	node2 := Node{ID: 2, InBox: box2, InChan: make(chan byte)}
-	smoother := TcpSplitBuffer{InChan: make(chan byte), Config: TcpSpliterBuffferConfig{"127.0.0.1",9091}}
+	smoother := TcpSplitBuffer{InChan: make(chan byte), Config: config.BufferConfig}
 	dispatcher := TcpExternalChoice{
 		InChan:     make(chan byte),
 		BoxesChans: []chan byte{node1.InChan, node2.InChan},
