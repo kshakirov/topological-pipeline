@@ -10,7 +10,7 @@ func ParallelComposition(config TcpSplitNodeConfig){
 	dispatcher := TcpExternalChoice{
 		InChan:     make(chan byte),
 		BoxesChans: []chan byte{node1.InChan, node2.InChan},
-		Config: TcpExternalChoiceConfig{"127.0.0.1",9090},
+		Config: config.ChoiceConfig,
 	}
 
 	parallelNode := TcpSplitNode{Nodes: []Node{node1, node2}, Buffer: smoother, Choice: dispatcher}
