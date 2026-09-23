@@ -9,6 +9,8 @@ import (
 
 type PrefixGeneratorFuncTCP func()
 type SinkFuncTCP func()
+type BoxFuncTcp func(byte) byte
+
 
 type PrefixGeneratorTCP struct {
 	Func PrefixGeneratorFuncTCP

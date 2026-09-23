@@ -1,6 +1,6 @@
 package main
 
-func ParallelComposition(config TcpSplitNodeConfig){
+func ParallelComposition(config TcpSplitNodeConfig, f BoxFuncTcp){
 	//here will be a function provided and number of nodes as parallelism
 	box1 := NewBoxB("b1", testComputeB)
 	box2 := NewBoxB("b2", testComputeB)
