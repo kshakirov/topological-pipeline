@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net"
 	"sync"
 	"time"
@@ -49,7 +48,7 @@ func (choice *TcpExternalChoice) WriteWithChoice() {
 		for {
 			n, err := conn.Read(buf)
 			if n > 0 {
-				Debug("TcpExternalChoice received payload ", "n", n)
+				Debug("TcpExternalChoice: received payload of bytes: ", "n", n, "content", buf[0])
 				choice.BoxesChans[choice.currentIndex] <- buf[0] //for POC just
 				choice.currentIndex = (choice.currentIndex + 1) % len(choice.BoxesChans)
 
@@ -61,43 +60,30 @@ func (choice *TcpExternalChoice) WriteWithChoice() {
 	}
 
 	if len(choice.BoxesChans) == 0 {
-		panic("LocalExternalChoice requires at least one worker channel")
+		panic("TcpExternalChoice: requires at least one worker channel")
 	}
 	for _, workerInput := range choice.BoxesChans {
 		if workerInput == nil {
-			panic("LocalExternalChoice worker channel must not be nil")
+			panic("TcpExternalChoice: worker channel must not be nil")
 		}
 	}
 	go func() {
-		Debug("Starting server on the host: ", "hostname", choice.Config.hostName)
+		Debug("TcpExternalChoice: Starting server on the host: ", "hostname", choice.Config.hostName)
 		ln, err := net.Listen("tcp", fmt.Sprintf("%s:%d", choice.Config.hostName, choice.Config.port))
 		if err != nil {
-			log.Fatalf("Can't listen on the port %d\n", choice.Config.port) // handle error
+			Debug("TcpExternalChoice: Can't listen on the port ", "port", choice.Config.port) // handle error
 		}
 		for {
 			conn, err := ln.Accept()
 			if err != nil {
 				// handle error
-				log.Fatalf("Someting wrong with the connection %v\n", err)
+				Debug("TcpExternalChoice: Someting wrong with the connection ", "error", err)
 			}
-			Debug("Got Connection from a client")
+			Debug("TcpExternalChoice: Got Connection from a client")
 			go handleConnection(conn)
 		}
 	}()
 
-	// go func() {
-	// 	defer func() {
-	// 		for _, workerInput := range choice.BoxesChans {
-	// 			close(workerInput)
-	// 		}
-	// 	}()
-
-	// 	for msg := range choice.InChan {
-	// 		Debug("LocalExternalChoice received payload", "msg", msg)
-	// 		choice.BoxesChans[choice.currentIndex] <- msg
-	// 		choice.currentIndex = (choice.currentIndex + 1) % len(choice.BoxesChans)
-	// 	}
-	// }()
 }
 
 type TcpSpliterBuffferConfig struct {
@@ -120,12 +106,13 @@ func (smoother *TcpSplitBuffer) Interleave() {
 
 		if err != nil {
 
-			log.Fatalf("Can't open the connection to %s  port %d\n", smoother.Config.hostName, smoother.Config.port)
+			Debug("LocalSplitBuffer: Can't open the connection to ", "host", smoother.Config.hostName, "port", smoother.Config.port)
 		}
 		for msg := range smoother.InChan {
-			Debug("LocalSplitBuffer received payload", "msg", msg)
-			fmt.Fprint(conn, msg)
-			Debug("PrefixGenerator emitted payload", "msg", msg)
+			Debug("LocalSplitBuffer: received payload", "msg", msg)
+			//			fmt.Fprint(conn, msg)
+			conn.Write([]byte{msg})
+			Debug("LocalSplitBuffer: emitted payload", "msg", msg)
 
 		}
 	}()
