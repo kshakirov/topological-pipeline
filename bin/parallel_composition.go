@@ -1,9 +1,9 @@
 package main
 
-func ParallelComposition(config TcpSplitNodeConfig, f BoxFuncTcp){
+func ParallelComposition(config TcpSplitNodeConfig, f BoxFuncB){
 	//here will be a function provided and number of nodes as parallelism
-	box1 := NewBoxB("b1", testComputeB)
-	box2 := NewBoxB("b2", testComputeB)
+	box1 := NewBoxB("b1", f)
+	box2 := NewBoxB("b2", f)
 	node1 := Node{ID: 1, InBox: box1, InChan: make(chan byte)}
 	node2 := Node{ID: 2, InBox: box2, InChan: make(chan byte)}
 	smoother := TcpSplitBuffer{InChan: make(chan byte), Config: config.BufferConfig}
