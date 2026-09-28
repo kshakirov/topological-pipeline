@@ -4,7 +4,7 @@
 **State:** CLOSED
 **Author:** @kshakirov
 **Created:** 2026-08-05T12:55:50Z
-**Updated:** 2026-09-22T14:22:50Z
+**Updated:** 2026-09-28T11:38:09Z
 **URL:** https://github.com/kshakirov/topological-pipeline/issues/4
 
 ---
@@ -89,6 +89,24 @@
 8. Проверить известный байт, серию байтов, round-robin, backpressure, drain, отсутствие утечек и `go test -race -count=100`.
 
 ST framing пока не трогаю: сначала довожу до устойчивости сырой TCP Wire и жизненный цикл узла.
+
+
+---
+
+### @kshakirov — 2026-09-28T11:38:09Z
+
+Промежуточный результат: Parallel Node теперь собирается с динамическим `Parallelism`, запускается одной точкой и распределяет работу атомарным round-robin. На трёх workers подтверждён цикл `1 → 2 → 3 → 1 → 2 → 3`; race detector замечаний не дал.
+
+Следующий рубеж:
+
+1. Реализовать потоковый ST decoder: `Magic → Length → Payload` с корректной сборкой кадра через произвольные TCP `Read`.
+2. После полной сборки кадра передавать один `Payload []byte` одному worker; граница `Read` больше не участвует в маршрутизации.
+3. Тот же framing использовать для связи NodeAgent с Elixir Coordinator, оставив трактовку payload верхнему уровню.
+4. Зафиксировать минимальные управляющие сообщения `REGISTER`, `READY`, `CONNECT`, `RUN` и ответы на них.
+5. После появления Coordinator убрать временные `Sleep`: сначала все входные listeners переходят в `READY`, затем Coordinator разрешает `CONNECT`, после успешных подключений — `RUN`.
+6. Отдельно оформить штатный EOF-drain и аварийное завершение через context.
+
+Data plane между узлами и control plane с Coordinator не смешиваются по смыслу, даже если используют общий ST framing.
 
 
 ---
