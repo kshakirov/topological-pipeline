@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -43,7 +44,7 @@ type TcpExternalChoiceConfig struct {
 }
 
 type TcpExternalChoice struct {
-	currentIndex int
+	currentIndex uint64
 	InChan       chan byte
 	BoxesChans   []chan byte
 	Config       TcpExternalChoiceConfig
@@ -58,8 +59,8 @@ func (choice *TcpExternalChoice) WriteWithChoice() {
 			n, err := conn.Read(buf)
 			if n > 0 {
 				Debug("TcpExternalChoice: received payload of bytes: ", "n", n, "content", buf[0])
-				choice.BoxesChans[choice.currentIndex] <- buf[0] //for POC just
-				choice.currentIndex = (choice.currentIndex + 1) % len(choice.BoxesChans)
+				nextId:=atomic.AddUint64(&choice.currentIndex, 1) -1
+				choice.BoxesChans[nextId % uint64(len(choice.BoxesChans))] <- buf[0] //for POC just
 
 			} else if err != nil {
 				Debug("Can't read from connection")
