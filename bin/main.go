@@ -7,7 +7,7 @@ func main() {
 
 	
 	parallelNode := ParallelComposition(TcpSplitNodeConfig{ TcpExternalChoiceConfig{"127.0.0.1",9090},
-		TcpSpliterBuffferConfig{"127.0.0.1",9091}, 2}, testComputeB)
+		TcpSpliterBuffferConfig{"127.0.0.1",9091}, 3}, testComputeB)
 	parallelNode.Start()
 	
 
