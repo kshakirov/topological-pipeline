@@ -6,8 +6,9 @@ func main() {
 	consumer := SinkTCP{Func: testSinkGeneratorLoopTCP("127.0.0.1",9091)}
 
 	
-	ParallelComposition(TcpSplitNodeConfig{ TcpExternalChoiceConfig{"127.0.0.1",9090},
+	parallelNode := ParallelComposition(TcpSplitNodeConfig{ TcpExternalChoiceConfig{"127.0.0.1",9090},
 		TcpSpliterBuffferConfig{"127.0.0.1",9091}, 2}, testComputeB)
+	parallelNode.Start()
 	
 
 	generator.Start()

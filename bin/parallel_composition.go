@@ -1,6 +1,6 @@
 package main
 
-func ParallelComposition(config TcpSplitNodeConfig, f BoxFuncB){
+func ParallelComposition(config TcpSplitNodeConfig, f BoxFuncB) TcpSplitNode{
 	//here will be a function provided and number of nodes as parallelism
 	box1 := NewBoxB("b1", f)
 	box2 := NewBoxB("b2", f)
@@ -10,17 +10,14 @@ func ParallelComposition(config TcpSplitNodeConfig, f BoxFuncB){
 	dispatcher := TcpExternalChoice{
 		InChan:     make(chan byte),
 		BoxesChans: []chan byte{node1.InChan, node2.InChan},
-		Config: config.ChoiceConfig,
+		Config:     config.ChoiceConfig,
 	}
 
-	parallelNode := TcpSplitNode{Nodes: []Node{node1, node2}, Buffer: smoother, Choice: dispatcher}
-	smoother.Interleave()
-	parallelNode.Process()
-	dispatcher.WriteWithChoice()
+	return  TcpSplitNode{Nodes: []Node{node1, node2}, Buffer: smoother, Choice: dispatcher}
 	//can be later returned to start somewhere else
 }
 
-func (pc * TcpSplitNode) Start(){
+func (pc *TcpSplitNode) Start() {
 	pc.Buffer.Interleave()
 	pc.Process()
 	pc.Choice.WriteWithChoice()
