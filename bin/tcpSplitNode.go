@@ -132,6 +132,7 @@ type TcpSplitNode struct {
 	Choice TcpExternalChoice
 	Nodes  []Node
 	Buffer TcpSplitBuffer
+	Agent NodeAgent
 }
 
 func (node *TcpSplitNode) Process() {
