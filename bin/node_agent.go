@@ -18,6 +18,7 @@ type NodeAgent struct {
 func revcieve_loop(conn net.Conn, outChan chan byte){
 	isAuxData:= false
 	dataBuffer:=make([]byte,1024)
+	defer close(outChan)
 	for  {
 		rb,err := conn.Read(dataBuffer)
 		if err!= nil {

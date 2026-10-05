@@ -56,6 +56,9 @@ func (choice *TcpExternalChoice) WriteWithChoice() {
 		}
 	}
 	go func() {
+		for _,c := range choice.BoxesChans{
+			defer close(c)
+		}
 		for msg := range choice.InChan {
 			Debug("TcpExternalChoice: received payload of bytes: ", "content", msg)
 			nextId := atomic.AddUint64(&choice.currentIndex, 1) - 1
@@ -82,7 +85,7 @@ type TcpSplitBuffer struct {
 func (smoother *TcpSplitBuffer) Interleave() {
 
 	go func() {
-
+		defer close(smoother.OutChan)
 		for msg := range smoother.InChan {
 			Debug("TcpSplitBuffer: received payload", "msg", msg)
 			smoother.OutChan <- msg

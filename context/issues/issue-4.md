@@ -4,7 +4,7 @@
 **State:** CLOSED
 **Author:** @kshakirov
 **Created:** 2026-08-05T12:55:50Z
-**Updated:** 2026-09-28T11:38:09Z
+**Updated:** 2026-10-05T12:12:30Z
 **URL:** https://github.com/kshakirov/topological-pipeline/issues/4
 
 ---
@@ -107,6 +107,28 @@ ST framing пока не трогаю: сначала довожу до усто
 6. Отдельно оформить штатный EOF-drain и аварийное завершение через context.
 
 Data plane между узлами и control plane с Coordinator не смешиваются по смыслу, даже если используют общий ST framing.
+
+
+---
+
+### @kshakirov — 2026-10-05T12:12:30Z
+
+Промежуточный рубеж нового транспорта:
+
+- TCP вынесен из External Choice и Smoother;
+- `NodeAgent` стал единственной сетевой границей Parallel Node;
+- локальный вход связан как `NodeAgent.OutChan → ExternalChoice.InChan`;
+- локальный выход связан как `Smoother.OutChan → NodeAgent.InChan`;
+- собран каскад завершения: Agent закрывает вход Choice → Choice закрывает worker inputs → `WaitGroup` закрывает вход Smoother → Smoother закрывает выход в Agent.
+
+Следующий заход:
+
+1. На окончательной ошибке/EOF сетевого `Read` выходить из receive loop, чтобы сработало закрытие входного канала и весь каскад реально завершился.
+2. Определить владельца и момент закрытия общего `net.Conn` после завершения send/receive loops.
+3. Довести первый `REGISTER` и ожидание Coordinator без преждевременного общего framing.
+4. Тем же механизмом подключить Prefix Generator и Sink.
+
+Для Generator и Sink остаётся тот же один full-duplex `NodeAgent` с сетевыми read/write loops, но локальный data plane односторонний по роли: Generator только отдаёт данные в Agent, Sink только получает данные от Agent. Управляющее направление соединения при этом остаётся двусторонним.
 
 
 ---
