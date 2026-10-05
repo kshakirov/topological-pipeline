@@ -1,17 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"net"
 	"sync"
 	"sync/atomic"
-	"time"
 )
 
 type PrefixGeneratorFuncTCP func()
 type SinkFuncTCP func()
 type BoxFuncTcp func(byte) byte
-
 
 type PrefixGeneratorTCP struct {
 	Func PrefixGeneratorFuncTCP
@@ -31,11 +27,10 @@ func (sink *SinkTCP) Consume() {
 	sink.Func()
 }
 
-type TcpSplitNodeConfig struct{
+type TcpSplitNodeConfig struct {
 	ChoiceConfig TcpExternalChoiceConfig
 	BufferConfig TcpSpliterBuffferConfig
-	Parallelism int
-	
+	Parallelism  int
 }
 
 type TcpExternalChoiceConfig struct {
@@ -52,23 +47,6 @@ type TcpExternalChoice struct {
 
 func (choice *TcpExternalChoice) WriteWithChoice() {
 
-	handleConnection := func(conn net.Conn) {
-		defer conn.Close()
-		buf := make([]byte, 64)
-		for {
-			n, err := conn.Read(buf)
-			if n > 0 {
-				Debug("TcpExternalChoice: received payload of bytes: ", "n", n, "content", buf[0])
-				nextId:=atomic.AddUint64(&choice.currentIndex, 1) -1
-				choice.BoxesChans[nextId % uint64(len(choice.BoxesChans))] <- buf[0] //for POC just
-
-			} else if err != nil {
-				Debug("Can't read from connection")
-				return
-			}
-		}
-	}
-
 	if len(choice.BoxesChans) == 0 {
 		panic("TcpExternalChoice: requires at least one worker channel")
 	}
@@ -78,20 +56,13 @@ func (choice *TcpExternalChoice) WriteWithChoice() {
 		}
 	}
 	go func() {
-		Debug("TcpExternalChoice: Starting server on the host: ", "hostname", choice.Config.hostName)
-		ln, err := net.Listen("tcp", fmt.Sprintf("%s:%d", choice.Config.hostName, choice.Config.port))
-		if err != nil {
-			Debug("TcpExternalChoice: Can't listen on the port ", "port", choice.Config.port) // handle error
+		for msg := range choice.InChan {
+			Debug("TcpExternalChoice: received payload of bytes: ", "content", msg)
+			nextId := atomic.AddUint64(&choice.currentIndex, 1) - 1
+			choice.BoxesChans[nextId%uint64(len(choice.BoxesChans))] <- msg //for POC just
+
 		}
-		for {
-			conn, err := ln.Accept()
-			if err != nil {
-				// handle error
-				Debug("TcpExternalChoice: Someting wrong with the connection ", "error", err)
-			}
-			Debug("TcpExternalChoice: Got Connection from a client")
-			go handleConnection(conn)
-		}
+
 	}()
 
 }
@@ -102,8 +73,9 @@ type TcpSpliterBuffferConfig struct {
 }
 
 type TcpSplitBuffer struct {
-	InChan chan byte
-	Config TcpSpliterBuffferConfig
+	InChan  chan byte
+	OutChan chan byte //this one to node agent
+	Config  TcpSpliterBuffferConfig
 	//	OutChan chan byte
 }
 
@@ -111,17 +83,9 @@ func (smoother *TcpSplitBuffer) Interleave() {
 
 	go func() {
 
-		time.Sleep(time.Second * 5)
-		conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", smoother.Config.hostName, smoother.Config.port))
-
-		if err != nil {
-
-			Debug("TcpSplitBuffer: Can't open the connection to ", "host", smoother.Config.hostName, "port", smoother.Config.port)
-		}
 		for msg := range smoother.InChan {
 			Debug("TcpSplitBuffer: received payload", "msg", msg)
-			//			fmt.Fprint(conn, msg)
-			conn.Write([]byte{msg})
+			smoother.OutChan <- msg
 			Debug("TcpSplitBuffer: emitted payload", "msg", msg)
 
 		}
@@ -132,7 +96,7 @@ type TcpSplitNode struct {
 	Choice TcpExternalChoice
 	Nodes  []Node
 	Buffer TcpSplitBuffer
-	Agent NodeAgent
+	Agent  NodeAgent
 }
 
 func (node *TcpSplitNode) Process() {
