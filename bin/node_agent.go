@@ -9,9 +9,39 @@ import (
 type NodeAgent struct {
 	TopologyId         int
 	NodeId             int
-	DataAddress        netip.AddrPort
+	OutChan chan byte
+	InChan chan byte
 	CoordinatorAddress netip.AddrPort
 	CoordinatorAlias string 
+}
+
+func revcieve_loop(conn net.Conn, outChan chan byte){
+	isAuxData:= false
+	dataBuffer:=make([]byte,1024)
+	for  {
+		rb,err := conn.Read(dataBuffer)
+		if err!= nil {
+			Debug("NodeAgent: Can't read message from Coordinator ", "err", err.Error())
+		}
+		//here checking what kind of data it is if aux data respond  else pass to Outchant
+		if isAuxData {
+			//do some writes info coordinator
+		}else {
+			for i:=0; i < rb; i++ {
+				outChan <- dataBuffer[i]
+			}
+		}
+	}
+}
+
+func send_loop(conn net.Conn, inChan chan byte){
+	for msg:=  range inChan {
+		_,err:=conn.Write([]byte{msg})
+		if err != nil {
+			Debug("NodeAgent: Can't writer message to Coordinator ", "error", err.Error())
+		}
+		//here we just write all we have from smoother
+	}
 }
 
 func (na *NodeAgent) Connect() {
@@ -34,5 +64,9 @@ func (na *NodeAgent) Connect() {
 			Debug("Cannot Read From Coordinator ")
 		}
 		Debug("Read From Coordinator ", "bytes", rb)
+		//if all okayt the connection is established we can go into the background
+		go revcieve_loop(conn, na.OutChan)
+		go send_loop(conn, na.InChan)
+		
 	}
 }
