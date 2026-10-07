@@ -23,6 +23,7 @@ func revcieve_loop(conn net.Conn, outChan chan byte){
 		rb,err := conn.Read(dataBuffer)
 		if err!= nil {
 			Debug("NodeAgent: Can't read message from Coordinator ", "err", err.Error())
+			break
 		}
 		//here checking what kind of data it is if aux data respond  else pass to Outchant
 		if isAuxData {
