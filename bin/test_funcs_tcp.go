@@ -18,7 +18,7 @@ func testPrefixGeneratorLoopTCP(coordinatorAddress string, port int) func() {
 			0x00, 0x05, // payload length = 5
 			0x01,       // REGISTER
 			0x00, 0x01, // TopologyID = 1
-			0x00, 0x03, // NodeID = 3
+			0x00, 0x01, // NodeID = 3
 		}
 
 		coordinator_data := make([]byte, 1024)
@@ -86,7 +86,7 @@ func testSinkGeneratorLoopTCP(coordinatorAddress string, port int) func() {
 			0x00, 0x05, // payload length = 5
 			0x01,       // REGISTER
 			0x00, 0x01, // TopologyID = 1
-			0x00, 0x04, // NodeID = 4
+			0x00, 0x02, // NodeID = 4
 		}
 		registered := []byte{
 			0x53, 0x54, // "ST"
