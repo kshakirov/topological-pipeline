@@ -45,7 +45,7 @@ func testPrefixGeneratorLoopTCP(coordinatorAddress string, port int) func() {
 		Debug("Read From Coordinator ", "bytes", rb)
 		//if all is okay push to coordinator check repsonse
 		Debug("data", coordinator_data[0:rb])
-		data_frame := []byte{0x53, 0x54, 0, 2, 3, 0}
+		data_frame := []byte{0x53, 0x54, 0, 2, 4, 0}
 
 		for {
 			value := rand.IntN(256)
