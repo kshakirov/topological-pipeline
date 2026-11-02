@@ -53,7 +53,7 @@ func Framer(payload []byte) (msgs [][]byte, tail []byte) {
 				status = Frame
 				frame_length = frame_length + int(p)
 				fmt.Printf("frame length is %d\n",frame_length)
-				frame_start = current_length
+				frame_start = idx + 1
 				frame_counter = frame_length - 1
 			}
 
