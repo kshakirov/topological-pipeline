@@ -4,6 +4,7 @@ import (
 	_ "fmt"
 	"net"
 	"net/netip"
+	"slices"
 )
 
 type NodeAgent struct {
@@ -16,8 +17,10 @@ type NodeAgent struct {
 }
 
 func revcieve_loop(conn net.Conn, outChan chan byte){
-	isAuxData:= false
+ 
 	dataBuffer:=make([]byte,1024)
+	var tail []byte
+	tail = nil
 	defer close(outChan)
 	for  {
 		rb,err := conn.Read(dataBuffer)
@@ -26,12 +29,29 @@ func revcieve_loop(conn net.Conn, outChan chan byte){
 			break
 		}
 		//here checking what kind of data it is if aux data respond  else pass to Outchant
-		if isAuxData {
+		var frames [][]byte
+		var new_tail[] byte
+		
+		if tail!= nil {
+			frames, new_tail = Framer(slices.Concat(tail, dataBuffer[0:rb]))
+		}else {
+			frames, new_tail = Framer(dataBuffer[0:rb])
+		}
+
+		if frames != nil {
+			for _, frame := range frames {
+				frame_length:= len(frame)
+				for i:=0; i < frame_length; i++ {
+					outChan <- frame[i]
+				}
+			}
+		}
+		if new_tail != nil {
+			tail = make([]byte, len(new_tail))
+			copy(tail, new_tail) 
 			//do some writes info coordinator
 		}else {
-			for i:=0; i < rb; i++ {
-				outChan <- dataBuffer[i]
-			}
+			tail = nil
 		}
 	}
 }

@@ -35,9 +35,9 @@
   "locked": false,
   "assignees": [],
   "milestone": null,
-  "comments": 0,
+  "comments": 1,
   "created_at": "2026-10-28T14:50:00Z",
-  "updated_at": "2026-10-28T14:50:00Z",
+  "updated_at": "2026-11-02T17:03:41Z",
   "closed_at": null,
   "assignee": null,
   "author_association": "OWNER",
@@ -47,6 +47,7 @@
     "completed": 0,
     "percent_completed": 0
   },
+  "parent_issue_url": "https://api.github.com/repos/kshakirov/topological-pipeline/issues/7",
   "issue_dependencies_summary": {
     "blocked_by": 0,
     "total_blocked_by": 0,
@@ -70,5 +71,54 @@
   "timeline_url": "https://api.github.com/repos/kshakirov/topological-pipeline/issues/8/timeline",
   "performed_via_github_app": null,
   "state_reason": null,
-  "pinned_comment": null
+  "pinned_comment": null,
+  "local_comments": [
+    {
+      "url": "https://api.github.com/repos/kshakirov/topological-pipeline/issues/comments/6583192436",
+      "html_url": "https://github.com/kshakirov/topological-pipeline/issues/8#issuecomment-6583192436",
+      "issue_url": "https://api.github.com/repos/kshakirov/topological-pipeline/issues/8",
+      "id": 6583192436,
+      "node_id": "IC_kwDOTlC_oM8AAAABiGOLdA",
+      "user": {
+        "login": "kshakirov",
+        "id": 1277345,
+        "node_id": "MDQ6VXNlcjEyNzczNDU=",
+        "avatar_url": "https://avatars.githubusercontent.com/u/1277345?v=4",
+        "gravatar_id": "",
+        "url": "https://api.github.com/users/kshakirov",
+        "html_url": "https://github.com/kshakirov",
+        "followers_url": "https://api.github.com/users/kshakirov/followers",
+        "following_url": "https://api.github.com/users/kshakirov/following{/other_user}",
+        "gists_url": "https://api.github.com/users/kshakirov/gists{/gist_id}",
+        "starred_url": "https://api.github.com/users/kshakirov/starred{/owner}{/repo}",
+        "subscriptions_url": "https://api.github.com/users/kshakirov/subscriptions",
+        "organizations_url": "https://api.github.com/users/kshakirov/orgs",
+        "repos_url": "https://api.github.com/users/kshakirov/repos",
+        "events_url": "https://api.github.com/users/kshakirov/events{/privacy}",
+        "received_events_url": "https://api.github.com/users/kshakirov/received_events",
+        "type": "User",
+        "user_view_type": "public",
+        "site_admin": false
+      },
+      "created_at": "2026-11-02T17:03:41Z",
+      "updated_at": "2026-11-02T17:03:41Z",
+      "body": "Подключил Framer к циклу чтения NodeAgent: склеиваем сохранённый хвост с новой порцией TCP, готовые payload передаём дальше, новый хвост копируем отдельно от переиспользуемого read-буфера.\n\nОтдельные framer-тесты проходят, включая два полных кадра подряд. Добавлен минимальный тест через net.Pipe: первый кадр приходит частями, его окончание — вместе с началом второго, затем приходит остаток второго.\n\nЭтот тест сейчас красный: получаем только первый payload 04 AA вместо 04 AA 04 BB. Нашли пропущенный случай во Framer: одновременно есть готовый payload и неполный следующий кадр. Начало второго теряется, NodeAgent уже нечего склеивать. Сохраняю как WIP, не как готовую реализацию.\n\nСледующий шаг: Framer должен возвращать готовые payload и весь незавершённый хвост одновременно, начиная с ST незавершённого кадра. Затем повторить net.Pipe-тест и framer-тесты. После этого продолжить проверки Magic/Length и DATA v1 decoder по этому тикету. ACK и маршрутизацию пока не трогаем.\n",
+      "author_association": "OWNER",
+      "pin": null,
+      "reactions": {
+        "url": "https://api.github.com/repos/kshakirov/topological-pipeline/issues/comments/6583192436/reactions",
+        "total_count": 0,
+        "+1": 0,
+        "-1": 0,
+        "laugh": 0,
+        "hooray": 0,
+        "confused": 0,
+        "heart": 0,
+        "rocket": 0,
+        "eyes": 0
+      },
+      "performed_via_github_app": null,
+      "minimized": null
+    }
+  ]
 }
