@@ -27,8 +27,17 @@ func TestFramer(t *testing.T) {
 	part_1 := frame1[0:10]
 	//	part_2 := frame1[10:]
 	msgs, tail := Framer(part_1)
-	if msgs == nil && tail == nil {
-		t.Fatalf("msgs and tail  cannot be nil together \n")
+	if msgs != nil  {
+		t.Fatalf("msgs must be nil \n")
+	}
+	if tail == nil{
+		t.Fatalf("tail  must not  be nil \n")
 	}
 
+	msgs, tail = Framer(frame1)
+	if msgs == nil{
+		t.Fatalf("msgs must not be nil \n")
+	}
+
+	
 }
