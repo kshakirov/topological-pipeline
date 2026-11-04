@@ -17,8 +17,8 @@ func TestReceiveLoopFragments(t *testing.T) {
 		defer writer.Close()
 		for _, part := range [][]byte{
 			{0x53, 0x54, 0, 2, 4},
-			{0xAA, 0x53, 0x54, 0, 2, 4},
-			{0xBB},
+			{0xAA, 0x53, 0x54, 0, 3, 4},
+			{0xBB, 0x0A},
 		} {
 			if _, err := writer.Write(part); err != nil {
 				return
@@ -33,7 +33,7 @@ func TestReceiveLoopFragments(t *testing.T) {
 		select {
 		case b, ok := <-out:
 			if !ok {
-				if !bytes.Equal(got, []byte{4, 0xAA, 4, 0xBB}) {
+				if !bytes.Equal(got, []byte{4, 0xAA, 4, 0xBb,0x0A}) {
 					t.Fatalf("got % X", got)
 				}
 				return
