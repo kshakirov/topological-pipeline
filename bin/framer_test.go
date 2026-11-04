@@ -28,19 +28,18 @@ func TestFramer(t *testing.T) {
 	part_1 := frame1[0:10]
 	//	part_2 := frame1[10:]
 	msgs, tail := Framer(part_1)
-	if msgs != nil  {
+	if msgs != nil {
 		t.Fatalf("msgs must be nil \n")
 	}
-	if tail == nil{
+	if tail == nil {
 		t.Fatalf("tail  must not  be nil \n")
 	}
 
 	msgs, tail = Framer(frame1)
-	if msgs == nil{
+	if msgs == nil {
 		t.Fatalf("msgs must not be nil \n")
 	}
 
-	
 }
 
 func TestFramerMultipleFrames(t *testing.T) {
@@ -68,5 +67,17 @@ func TestFramerMultipleFrames(t *testing.T) {
 	}
 	if len(tail) != 0 {
 		t.Errorf("unexpected tail: % X", tail)
+	}
+}
+
+func TestFramerFrameAndPartialTail(t *testing.T) {
+	input := []byte{0x53, 0x54, 0, 2, 4, 0xAA, 0x53, 0x54, 0, 3, 4}
+
+	msgs, tail := Framer(input)
+	if len(msgs) != 1 || !bytes.Equal(msgs[0], []byte{4, 0xAA}) {
+		t.Fatalf("unexpected payloads: % X", msgs)
+	}
+	if !bytes.Equal(tail, []byte{0x53, 0x54, 0, 3, 4}) {
+		t.Fatalf("unexpected tail: % X", tail)
 	}
 }

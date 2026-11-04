@@ -33,7 +33,7 @@ func TestReceiveLoopFragments(t *testing.T) {
 		select {
 		case b, ok := <-out:
 			if !ok {
-				if !bytes.Equal(got, []byte{4, 0xAA, 4, 0xBb,0x0A}) {
+				if !bytes.Equal(got, []byte{4, 0xAA, 4, 0xBb, 0x0A}) {
 					t.Fatalf("got % X", got)
 				}
 				return
