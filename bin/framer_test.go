@@ -8,22 +8,13 @@ import (
 func TestFramer(t *testing.T) {
 
 	frame1 := []byte{
-		0x53, 0x54, 0x00, 0x1C, // ST, Length=28
+		0x53, 0x54, 0x00, 0x34, // ST, Length=52
 		0x04, 0x01, 0x00, // DATA, Version, Flags
-		0, 0, 0, 0, 0, 0, 0, 1, // RootID
-		0, 0, 0, 0, 0, 0, 0, 1, // MessageID
-		0, 0, 0, 0, 0, 0, 0, 0, // ParentID
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, // RootID UUID
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, // MessageID UUID
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // ParentID UUID
 		0xAA,
 	}
-
-	// frame2 := []byte{
-	// 	0x53, 0x54, 0x00, 0x1C,
-	// 	0x04, 0x01, 0x00,
-	// 	0, 0, 0, 0, 0, 0, 0, 1,
-	// 	0, 0, 0, 0, 0, 0, 0, 2,
-	// 	0, 0, 0, 0, 0, 0, 0, 0,
-	// 	0xBB,
-	// }
 
 	part_1 := frame1[0:10]
 	//	part_2 := frame1[10:]
@@ -44,15 +35,15 @@ func TestFramer(t *testing.T) {
 
 func TestFramerMultipleFrames(t *testing.T) {
 	frame1 := []byte{
-		0x53, 0x54, 0x00, 0x1C,
+		0x53, 0x54, 0x00, 0x34,
 		0x04, 0x01, 0x00,
-		0, 0, 0, 0, 0, 0, 0, 1, // RootID
-		0, 0, 0, 0, 0, 0, 0, 1, // MessageID
-		0, 0, 0, 0, 0, 0, 0, 0, // ParentID
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, // RootID UUID
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, // MessageID UUID
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // ParentID UUID
 		0xAA,
 	}
 	frame2 := append([]byte(nil), frame1...)
-	frame2[22] = 2 // MessageID = 2
+	frame2[38] = 2 // MessageID UUID ending in 2
 	frame2[len(frame2)-1] = 0xBB
 	input := append(append([]byte(nil), frame1...), frame2...)
 
