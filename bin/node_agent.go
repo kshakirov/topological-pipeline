@@ -16,7 +16,7 @@ type NodeAgent struct {
 	CoordinatorAlias string 
 }
 
-func revcieve_loop(conn net.Conn, outChan chan Message){
+func recieve_loop(conn net.Conn, outChan chan Message){
  
 	dataBuffer:=make([]byte,1024)
 	var tail []byte
@@ -95,7 +95,7 @@ func (na *NodeAgent) Connect() {
 		}
 		Debug("Read From Coordinator ", "bytes", rb)
 		//if all okayt the connection is established we can go into the background
-		go revcieve_loop(conn, na.OutChan)
+		go recieve_loop(conn, na.OutChan)
 		go send_loop(conn, na.InChan)
 		
 	}
