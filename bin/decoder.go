@@ -12,12 +12,13 @@ type Message struct {
 	Payload []byte
 }
 
-func Decode(payload []byte ) (data Message, e error ){
+func Decoder(payload []byte ) (data Message, e error ){
 	var msg Message
 	if len(payload ) >= 51 && payload [0] == 4 && payload[1]==1{
 		copy(msg.RootId[:], payload[3:])
 		copy(msg.MessageId[:], payload[19:])
 		copy(msg.ParentId[:], payload[35:])
+		msg.Flags =  payload[2]
 		msg.Payload= make([]byte, len(payload) - 51)
 		copy(msg.Payload[:], payload[51:])
 		

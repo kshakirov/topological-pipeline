@@ -10,11 +10,11 @@ func TestDecoder(t *testing.T){
 		0x9b, 0x2a, 0xf9, 0xd0, 0x1e, 0x76, 0x4b, 0x8c, 0x8f, 0x67, 0xcc, 0xb0, 0xe3, 0x4e, 0x8c, 0x6a,
 		0xAA,
 	}
-	result,err := Decode(payload)
+	result,err := Decoder(payload)
 	if err != nil{
 		t.Fatal("must not be error")
 	}
-	if len(result.Payload)!=1 {
+	if len(result.Payload)!=1 || result.Payload[0]!= 0xAA {
 		t.Fatal("must be of size 1")
 	}
 	
