@@ -10,13 +10,13 @@ import (
 type NodeAgent struct {
 	TopologyId         int
 	NodeId             int
-	OutChan chan byte
-	InChan chan byte
+	OutChan chan Message
+	InChan chan Message
 	CoordinatorAddress netip.AddrPort
 	CoordinatorAlias string 
 }
 
-func revcieve_loop(conn net.Conn, outChan chan byte){
+func revcieve_loop(conn net.Conn, outChan chan Message){
  
 	dataBuffer:=make([]byte,1024)
 	var tail []byte
@@ -40,10 +40,14 @@ func revcieve_loop(conn net.Conn, outChan chan byte){
 
 		if frames != nil {
 			for _, frame := range frames {
-				frame_length:= len(frame)
-				for i:=0; i < frame_length; i++ {
-					outChan <- frame[i]
-				}
+
+					msg,e :=Decoder(frame)
+					if e != nil{
+						Debug("Something wrong wiith decoding", "frame", frame)
+					}else {
+						outChan <- msg
+					}
+
 			}
 		}
 		if new_tail != nil {
@@ -56,9 +60,13 @@ func revcieve_loop(conn net.Conn, outChan chan byte){
 	}
 }
 
-func send_loop(conn net.Conn, inChan chan byte){
+func send_loop(conn net.Conn, inChan chan Message){
+	//
+	
 	for msg:=  range inChan {
-		_,err:=conn.Write([]byte{msg})
+		payload := Encoder(msg)
+		written,err:=conn.Write(payload)
+		Debug("Written ", "bytes", written, " the resu must be processed in a cycle ")
 		if err != nil {
 			Debug("NodeAgent: Can't writer message to Coordinator ", "error", err.Error())
 		}

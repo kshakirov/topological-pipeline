@@ -40,8 +40,8 @@ type TcpExternalChoiceConfig struct {
 
 type TcpExternalChoice struct {
 	currentIndex uint64
-	InChan       chan byte
-	BoxesChans   []chan byte
+	InChan       chan Message
+	BoxesChans   []chan Message
 	Config       TcpExternalChoiceConfig
 }
 
@@ -76,8 +76,8 @@ type TcpSpliterBuffferConfig struct {
 }
 
 type TcpSplitBuffer struct {
-	InChan  chan byte
-	OutChan chan byte //this one to node agent
+	InChan  chan Message
+	OutChan chan Message //this one to node agent
 	Config  TcpSpliterBuffferConfig
 	//	OutChan chan byte
 }

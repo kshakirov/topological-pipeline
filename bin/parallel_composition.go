@@ -6,14 +6,14 @@ import (
 
 func ParallelComposition(config TcpSplitNodeConfig, f BoxFuncB) TcpSplitNode {
 	nodes := make([]Node, config.Parallelism)
-	boxes_chans := make([]chan byte, config.Parallelism)
+	boxes_chans := make([]chan Message, config.Parallelism)
 	for i := 0; i < config.Parallelism; i++ {
-		nodes[i] = Node{ID: i + 1, InBox: NewBoxB(fmt.Sprintf("b%d", i+1), f), InChan: make(chan byte)}
+		nodes[i] = Node{ID: i + 1, InBox: NewBoxB(fmt.Sprintf("b%d", i+1), f), InChan: make(chan Message)}
 		boxes_chans[i] = nodes[i].InChan
 	}
 
-	smoother := TcpSplitBuffer{InChan: make(chan byte), Config: config.BufferConfig, OutChan: make (chan byte)}
-	node_agent := NodeAgent{TopologyId: 1, NodeId: 1, CoordinatorAlias: "elixirCoordinator:900", OutChan: make(chan byte), InChan: smoother.OutChan}
+	smoother := TcpSplitBuffer{InChan: make(chan Message), Config: config.BufferConfig, OutChan: make (chan Message)}
+	node_agent := NodeAgent{TopologyId: 1, NodeId: 1, CoordinatorAlias: "elixirCoordinator:900", OutChan: make(chan Message), InChan: smoother.OutChan}
 	dispatcher := TcpExternalChoice{
 		InChan:     node_agent.OutChan,
 		BoxesChans: boxes_chans,

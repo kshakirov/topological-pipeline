@@ -2,7 +2,7 @@ package main
 
 import "sync"
 
-type BoxFuncB func(in byte) byte
+type BoxFuncB func(in Message) Message
 
 type BoxB struct {
 	ID        string
@@ -48,8 +48,8 @@ func (choice *LocalExternalChoice) WriteWithChoice() {
 }
 
 type LocalSplitBuffer struct {
-	InChan  chan byte
-	OutChan chan byte
+	InChan  chan Message
+	OutChan chan Message
 }
 
 func (smoother *LocalSplitBuffer) Interleave() {
@@ -65,7 +65,7 @@ func (smoother *LocalSplitBuffer) Interleave() {
 type Node struct {
 	ID     int
 	InBox  *BoxB
-	InChan chan byte
+	InChan chan Message
 }
 
 type LocalSplitNode struct {
