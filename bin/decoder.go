@@ -1,13 +1,17 @@
 package main
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/google/uuid"
+)
 
 
 
 type Message struct {
-	RootId [16] byte
-	MessageId [16]byte
-	ParentId [16]byte
+	RootId uuid.UUID
+	MessageId uuid.UUID
+	ParentId uuid.UUID
 	Flags byte
 	Payload []byte
 }
@@ -15,9 +19,12 @@ type Message struct {
 func Decoder(payload []byte ) (data Message, e error ){
 	var msg Message
 	if len(payload ) >= 51 && payload [0] == 4 && payload[1]==1{
-		copy(msg.RootId[:], payload[3:])
-		copy(msg.MessageId[:], payload[19:])
-		copy(msg.ParentId[:], payload[35:])
+		id ,err  := uuid.FromBytes(payload[3:19])
+		if err == nil{
+		msg.RootId = id
+		}
+		msg.MessageId, err  = uuid.FromBytes( payload[19:35])
+		msg.ParentId,err  = uuid.FromBytes( payload[35:51])
 		msg.Flags =  payload[2]
 		msg.Payload= make([]byte, len(payload) - 51)
 		copy(msg.Payload[:], payload[51:])
