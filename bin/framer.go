@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"slices"
 )
 
 type Status byte
@@ -104,3 +105,11 @@ func Framer(payload []byte) (msgs [][]byte, tail []byte) {
 	return frames, tail
 
 }
+
+func PrefixFrame(payload []byte) ([]byte) {
+	length:=len(payload)
+	l := [2]byte{byte(length >>8), byte(length)}
+	st := []byte{0x53,0x54}
+	return slices.Concat(st, l[:],payload)
+}
+
