@@ -4,11 +4,16 @@ import (
 	"context"
 	"math/rand/v2"
 	"time"
+
+	"github.com/google/uuid"
 )
 
-func testComputeB(input byte) byte {
-	Debug("testComputeB received payload", "input", input)
-	return input & 1
+func testComputeB(msg Message) Message {
+	Debug("testComputeB received message with RootId", "id", msg.RootId)
+	msg.ParentId = msg.MessageId
+	msg.MessageId = uuid.New()
+	msg.Payload[0] = msg.Payload[0] & 1
+	return msg
 }
 
 func testPrefixGeneratorLoop(ctx context.Context) func(chan byte) {

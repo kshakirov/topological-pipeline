@@ -53,8 +53,9 @@ func testPrefixGeneratorLoopTCP(coordinatorAddress string, port int) func() {
 			interval := rand.NormFloat64()*0.5 + 2
 			duration := time.Duration(interval * float64(time.Second))
 			time.Sleep(duration)
-			msg := Message{RootId: uuid.New(), ParentId: uuid.Nil, MessageId: uuid.Nil,Flags: 0}
-			
+			rootID := uuid.New()
+			msg := Message{RootId: rootID, ParentId: uuid.Nil, MessageId: rootID, Flags: 0}
+
 			msg.Payload = []byte{byte(value)}
 			_, err := conn.Write(PrefixFrame(Encoder(msg)))
 			if err != nil {
@@ -88,7 +89,7 @@ func testSinkGeneratorLoopTCP(coordinatorAddress string, port int) func() {
 			0x00, 0x05, // payload length = 5
 			0x01,       // REGISTER
 			0x00, 0x01, // TopologyID = 1
-			0x00, 0x02, // NodeID = 4
+			0x00, 0x03, // NodeID = 3
 		}
 		registered := []byte{
 			0x53, 0x54, // "ST"
@@ -122,7 +123,7 @@ func testSinkGeneratorLoopTCP(coordinatorAddress string, port int) func() {
 			Debug("Sink: unexpected registration response", "data", coordinatorData)
 			return
 		}
-		Debug("Sink: registered in Coordinator", "topology_id", 1, "node_id", 4)
+		Debug("Sink: registered in Coordinator", "topology_id", 1, "node_id", 3)
 
 		//		handleConnection(conn)
 		messages := make(chan Message)

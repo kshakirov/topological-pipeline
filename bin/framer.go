@@ -106,10 +106,9 @@ func Framer(payload []byte) (msgs [][]byte, tail []byte) {
 
 }
 
-func PrefixFrame(payload []byte) ([]byte) {
-	length:=len(payload)
-	l := [2]byte{byte(length >>8), byte(length)}
-	st := []byte{0x53,0x54}
-	return slices.Concat(st, l[:],payload)
+func PrefixFrame(payload []byte) []byte {
+	length := len(payload)
+	l := [2]byte{byte(length >> 8), byte(length)}
+	st := []byte{0x53, 0x54}
+	return slices.Concat(st, l[:], payload)
 }
-
