@@ -66,8 +66,7 @@ func send_loop(conn net.Conn, inChan chan Message) {
 
 	for msg := range inChan {
 		payload := PrefixFrame(Encoder(msg))
-		written, err := conn.Write(payload)
-		Debug("Written ", "bytes", written, " the resu must be processed in a cycle ")
+		_, err := conn.Write(payload)
 		if err != nil {
 			Debug("NodeAgent: Can't writer message to Coordinator ", "error", err.Error())
 		}
@@ -94,13 +93,13 @@ func (na *NodeAgent) Connect() {
 		if err != nil {
 			Debug("Cannot Write to Coordinator ", "address", na.CoordinatorAddress)
 		}
-		Debug("Written to Coordinator ", "bytes", wb)
+		_ = wb
 		rb, err := io.ReadFull(conn, coordinator_data)
 		if err != nil {
 
 			Debug("Cannot Read From Coordinator ")
 		}
-		Debug("Read From Coordinator ", "bytes", rb)
+		_ = rb
 		//if all okayt the connection is established we can go into the background
 		go recieve_loop(conn, na.OutChan)
 		go send_loop(conn, na.InChan)

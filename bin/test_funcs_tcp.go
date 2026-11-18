@@ -37,16 +37,14 @@ func testPrefixGeneratorLoopTCP(coordinatorAddress string, port int) func() {
 		if err != nil {
 			Debug("Cannot Write to Coordinator ", "address", coordinatorAddress)
 		}
-		Debug("Written to Coordinator ", "bytes", wb)
 		rb, err := conn.Read(coordinator_data) //read can be in batches
 
 		if err != nil {
 
 			Debug("Cannot Read From Coordinator ")
 		}
-		Debug("Read From Coordinator ", "bytes", rb)
-		//if all is okay push to coordinator check repsonse
-		Debug("data", coordinator_data[0:rb])
+		_ = wb
+		_ = rb
 
 		for {
 			value := rand.IntN(256)
@@ -55,9 +53,14 @@ func testPrefixGeneratorLoopTCP(coordinatorAddress string, port int) func() {
 			time.Sleep(duration)
 			rootID := uuid.New()
 			msg := Message{RootId: rootID, ParentId: uuid.Nil, MessageId: rootID, Flags: 0}
+			beginMsg := Begin(rootID, rootID)
 
+			_, err := conn.Write(PrefixFrame(beginMsg))
+			if err != nil {
+				Debug("PrefixGenerator: cannot write begin ack")
+			}
 			msg.Payload = []byte{byte(value)}
-			_, err := conn.Write(PrefixFrame(Encoder(msg)))
+			_, err = conn.Write(PrefixFrame(Encoder(msg)))
 			if err != nil {
 				Debug("PrefixGenerator: cannot write byte", "value", value)
 			}
@@ -111,14 +114,14 @@ func testSinkGeneratorLoopTCP(coordinatorAddress string, port int) func() {
 			Debug("Cannot Write to Coordinator ", "address", coordinatorAddress)
 			return
 		}
-		Debug("Written to Coordinator ", "bytes", wb)
+		_ = wb
 
 		rb, err := io.ReadFull(conn, coordinatorData)
 		if err != nil {
 			Debug("Cannot Read From Coordinator ", "error", err)
 			return
 		}
-		Debug("Read From Coordinator ", "bytes", rb)
+		_ = rb
 		if !bytes.Equal(coordinatorData, registered) {
 			Debug("Sink: unexpected registration response", "data", coordinatorData)
 			return

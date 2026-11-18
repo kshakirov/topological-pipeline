@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"slices"
 )
 
@@ -29,7 +28,6 @@ func Framer(payload []byte) (msgs [][]byte, tail []byte) {
 
 	for idx, p := range payload {
 		comb := [3]byte{byte(status), p, byte(current_length)}
-		fmt.Printf("idx[%d] = %v\n", idx, comb)
 		switch comb {
 
 		case [3]byte{byte(Magic), 0x53, 0x0}:
@@ -85,22 +83,15 @@ func Framer(payload []byte) (msgs [][]byte, tail []byte) {
 
 		}
 	}
-	fmt.Printf("Current frame length is %d\n", frame_length)
-	fmt.Printf("Current  length is %d aux length %d \n", current_length, aux_length)
-
 	if len(frames) == 0 {
 		frames = nil
-		fmt.Printf("there is no ready frame, current length is %d\n", current_length)
 		tail = payload
 	} else {
 		if current_length-aux_length < frame_length {
-			fmt.Printf("there is a  tail its  current length is %d\n", current_length)
 			tail = payload[msg_start:]
 
 		}
 	}
-	fmt.Printf("frames %v\n", frames)
-	fmt.Printf("tail %v\n", tail)
 
 	return frames, tail
 
