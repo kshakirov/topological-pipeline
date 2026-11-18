@@ -12,7 +12,7 @@ func ParallelComposition(config TcpSplitNodeConfig, f BoxFuncB) TcpSplitNode {
 		boxes_chans[i] = nodes[i].InChan
 	}
 
-	smoother := TcpSplitBuffer{InChan: make(chan Message), Config: config.BufferConfig, OutChan: make(chan Message)}
+	smoother := TcpSplitBuffer{InChan: make(chan OutBound), Config: config.BufferConfig, OutChan: make(chan OutBound)}
 	node_agent := NodeAgent{TopologyId: 1, NodeId: 2, CoordinatorAlias: "127.0.0.1:9300", OutChan: make(chan Message), InChan: smoother.OutChan}
 	dispatcher := TcpExternalChoice{
 		InChan:     node_agent.OutChan,

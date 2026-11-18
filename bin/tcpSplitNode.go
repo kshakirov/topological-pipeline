@@ -75,8 +75,8 @@ type TcpSpliterBuffferConfig struct {
 }
 
 type TcpSplitBuffer struct {
-	InChan  chan Message
-	OutChan chan Message //this one to node agent
+	InChan  chan OutBound
+	OutChan chan OutBound //this one to node agent
 	Config  TcpSpliterBuffferConfig
 	//	OutChan chan byte
 }
@@ -107,8 +107,10 @@ func (node *TcpSplitNode) Process() {
 			go func(worker Node) {
 				defer workers.Done()
 				for msg := range worker.InChan {
-					result := worker.InBox.UserFuncB(msg)
-					node.Buffer.InChan <- result
+					results := worker.InBox.UserFuncB(msg)
+					for _, outbound := range results {
+						node.Buffer.InChan <- outbound
+					}
 				}
 			}(worker)
 		}

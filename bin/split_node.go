@@ -2,7 +2,7 @@ package main
 
 import "sync"
 
-type BoxFuncB func(in Message) Message
+type BoxFuncB func(in Message) []OutBound
 
 type BoxB struct {
 	ID        string
@@ -48,8 +48,8 @@ func (choice *LocalExternalChoice) WriteWithChoice() {
 }
 
 type LocalSplitBuffer struct {
-	InChan  chan Message
-	OutChan chan Message
+	InChan  chan OutBound
+	OutChan chan OutBound
 }
 
 func (smoother *LocalSplitBuffer) Interleave() {
@@ -81,9 +81,10 @@ func (node *LocalSplitNode) Process() {
 			go func(worker Node) {
 				defer workers.Done()
 				for msg := range worker.InChan {
-					result := worker.InBox.UserFuncB(msg)
-					Debug("Box processed payload", "id", worker.ID, "result", result)
-					node.Buffer.InChan <- result
+					results := worker.InBox.UserFuncB(msg)
+					for _, outbound := range results {
+						node.Buffer.InChan <- outbound
+					}
 				}
 			}(worker)
 		}

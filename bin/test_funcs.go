@@ -8,12 +8,24 @@ import (
 	"github.com/google/uuid"
 )
 
-func testComputeB(msg Message) Message {
+func testComputeB(msg Message) []OutBound {
 	Debug("testComputeB received message with RootId", "id", msg.RootId)
-	msg.ParentId = msg.MessageId
+	completedID := msg.MessageId
+	msg.ParentId = completedID
 	msg.MessageId = uuid.New()
 	msg.Payload[0] = msg.Payload[0] & 1
-	return msg
+
+	return []OutBound{
+		{
+			Kind: COMPLETE,
+			Complete: CompleteMessage{
+				rootId:      msg.RootId,
+				completedId: completedID,
+				children:    []uuid.UUID{msg.MessageId},
+			},
+		},
+		{Kind: DATA, Data: msg},
+	}
 }
 
 func testPrefixGeneratorLoop(ctx context.Context) func(chan byte) {

@@ -12,9 +12,22 @@ type NodeAgent struct {
 	TopologyId         int
 	NodeId             int
 	OutChan            chan Message
-	InChan             chan Message
+	InChan             chan OutBound
 	CoordinatorAddress netip.AddrPort
 	CoordinatorAlias   string
+}
+
+type MessageKind int
+
+const (
+	DATA MessageKind = iota
+	COMPLETE
+)
+
+type OutBound struct {
+	Kind     MessageKind
+	Data     Message
+	Complete CompleteMessage
 }
 
 func recieve_loop(conn net.Conn, outChan chan Message) {
@@ -61,15 +74,28 @@ func recieve_loop(conn net.Conn, outChan chan Message) {
 	}
 }
 
-func send_loop(conn net.Conn, inChan chan Message) {
+func send_loop(conn net.Conn, inChan chan OutBound) {
 	//
 
 	for msg := range inChan {
-		payload := PrefixFrame(Encoder(msg))
-		_, err := conn.Write(payload)
-		if err != nil {
-			Debug("NodeAgent: Can't writer message to Coordinator ", "error", err.Error())
+		switch msg.Kind {
+		case DATA:
+			{
+				_, err := conn.Write(PrefixFrame(Encoder(msg.Data)))
+				if err != nil {
+					Debug("NodeAgent: Can't writer message to Coordinator ", "error", err.Error())
+				}
+			}
+		case COMPLETE:
+			{
+				_, err := conn.Write(PrefixFrame(Complete(msg.Complete)))
+				if err != nil {
+					Debug("NodeAgent: Can't writer message to Coordinator ", "error", err.Error())
+				}
+			}
+
 		}
+
 		//here we just write all we have from smoother
 	}
 }
